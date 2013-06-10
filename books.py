@@ -1,5 +1,21 @@
 import json
 from urllib2 import *
+from BeautifulSoup import BeautifulSoup
+
+
+def find_isbn_title(title):
+    """(str)->str
+    dsc: find isbn from given title
+    >>>find_isbn_title('Information Cloud (Tales of Cinnamon City)')
+    0957219008
+    """
+    url = 'http://www.librarything.com/api/thingTitle/'
+    xml = urlopen(url+title).read()
+    xml = BeautifulSoup(xml)
+    if xml.find('isbn'):
+        return xml.find('isbn').text
+    else:
+        return ''
 
 
 def find_isbn_name(name):
@@ -39,4 +55,6 @@ reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
         result.append(data['books'][book_id]['ISBN_cleaned'])
     return result
 
-print find_isbn_name("Jon.Roemer")
+#print find_isbn_name("Jon.Roemer")
+title = 'Information Cloud (Tales of Cinnamon City)'
+print find_isbn_title(title)
