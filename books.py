@@ -1,6 +1,17 @@
 import json
 from urllib2 import *
 from BeautifulSoup import BeautifulSoup
+from datetime import datetime
+
+
+def log(message):
+    """(str)->None
+    dsc: logging
+    """
+    date = str(datetime.now())
+    with open("./data/book.log", "a") as file:
+        file.write(date+" "+message+"\n")
+    print("somthing happend, see book.log for more information")
 
 
 def find_isbn_title(title):
@@ -15,6 +26,7 @@ def find_isbn_title(title):
     if xml.find('isbn'):
         return xml.find('isbn').text
     else:
+        log('no isbn found for '+str(title))
         return ''
 
 
@@ -31,13 +43,13 @@ reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
         respond = urlopen(url)
     except HTTPError, err:
         if err.code == 404:
-            print "Page not found!"
+            log("Page not found!")
         elif err.code == 403:
-            print "Access denied!"
+            log("Access denied!")
         else:
-            print "Error ", err.code
+            log("Error "+str(err.code))
     except URLError, err:
-        print err.reason
+        log(str(err.reason))
     data = respond.read()
     return data
 
@@ -62,7 +74,7 @@ def find_isbn_name(name):
         if 'books' in data.keys():
             for book_id in data['books'].keys():
                 isbn = data['books'][book_id]['ISBN_cleaned']
-                if isbn == '':
+                if isbn == '':  # find missing isbn
                     title = data['books'][book_id]['title']
                     print 'Retrieving isbn for %s...' % title
                     isbn = find_isbn_title(title)
@@ -71,8 +83,7 @@ def find_isbn_name(name):
                     result.append(isbn)
         return result
     else:
-        return 'No data found for %s' % name
+        message = 'No data found for %s' % name
+        log(message)
 
 print find_isbn_name("Jon.Roemer")
-#title = 'Information Cloud (Tales of Cinnamon City)'
-#print find_isbn_title(title)
