@@ -23,6 +23,7 @@ def get_all_friends(name):
     >>>get_all_friends('masoodr')
     []
     """
+    print 'Retrieving friends list for %s...' % name
     url = 'http://www.librarything.com/profile/' + quote(name)
     try:
         html = urlopen(url)
@@ -48,4 +49,24 @@ def get_all_friends(name):
             result.append(friend.text)
     return result
 
-print get_all_friends('masoodr')
+
+def find_friends(name):
+    """(str)->list
+    dsc: find friends from local storage or get it from internet
+    >>>find_friends('dummy')
+    ['11111', '22222']
+    >>>find_friends('masoodr')
+    []
+    """
+    with open('./data/friends.json', 'r') as name_repository:
+        for line in name_repository:
+            record = json.loads(line)
+            if name in record.keys():
+                return record[name]
+    friends = get_all_friends(name)
+    with open('./data/friends.json', 'a') as name_repository:
+        record = json.dumps({name: friends})
+        name_repository.write(record+'\n')
+    return friends
+
+print find_friends('Movielizard')
