@@ -1,0 +1,12 @@
+data
+
+*.png
+*.pdf
+*.json
+*.html
+*.list
+*.dat
+*.sql
+*.xml
+
+*.pyc
