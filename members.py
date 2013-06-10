@@ -38,4 +38,22 @@ def get_members_work(work):
         data.write(result)
     return result
 
-#print get_members_work('12569876')
+
+def find_all_members(work):
+    """(str)->list
+    dsc: find all members of a given book
+    """
+    try:  # read content if file exits
+        with open('./data/book/'+work+'.html') as file:
+            data = file.read()
+    except IOError:  # otherwise get it and save it  for further use
+        data = get_members_work(work)
+    data = BeautifulSoup(data)
+    links = data.findAll('a')
+    result = []
+    if links != []:
+        for a in links:
+            result.append(a['href'][9:])  # trim achor tags to get profile name
+    return result
+
+print find_all_members('12569876')
