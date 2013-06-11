@@ -15,7 +15,7 @@ def log(message):
     print("Error: "+message+", more information in tags.log")
 
 
-def get_all(work):
+def get_all_tag_work(work):
     """(str)->dic
     dsc: get all tags and counts for given book
     """
@@ -45,4 +45,26 @@ def get_all(work):
     return result
 
 
-print get_all('306947')
+def find_all_tag_work(work):
+    """(str)->dict
+    dsc: find all tags from local storage otherwise download and save it
+    >>>find_all_tag_work('dummy')
+    {'11111': '24', '22222': '1'}
+    """
+    # if we had the information local
+    with open('./data/tags.json', 'r') as tag_repository:
+        for line in tag_repository:
+            record = json.loads(line)
+            if work in record.keys():
+                return record[work]
+    #if we don't have tags for given work id
+    tags = get_all_tag_work(work)
+    if tags != {}:
+        with open('./data/tags.json', 'a') as tag_repository:
+            record = json.dumps({work: tags})
+            tag_repository.write(record+'\n')
+        return record
+
+
+#print find_all_tag_work('306947')
+#print find_all_tag_work('dummy')
