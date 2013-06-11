@@ -69,4 +69,4 @@ def find_friends(name):
         name_repository.write(record+'\n')
     return friends
 
-print find_friends('Movielizard')
+#print find_friends('Movielizard')

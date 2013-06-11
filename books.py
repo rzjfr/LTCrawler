@@ -21,6 +21,7 @@ def get_isbn_title(title):
     >>>get_isbn_title('Information Cloud (Tales of Cinnamon City)')
     0957219008
     """
+    print 'Retrieving isbn for %s...' % title
     url = 'http://www.librarything.com/api/thingTitle/'
     try:
         xml = urlopen(url+title)
@@ -72,6 +73,7 @@ def get_json_name(name):
     """(str)->str
     dsc: find json file for given name
     """
+    print 'Retrieving data for %s...' % name
     url = '''http://www.librarything.com/api_getdata.php?
 userid=%s&tagList=0&showstructure=1&max=1000000&
 reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
@@ -102,7 +104,6 @@ def find_isbn_name(name):
         with open('./data/profile/'+name+'.json') as file:
             data = file.read()
     except IOError:  # otherwise get it and save it  for further use
-        print 'Retrieving data for %s...' % name
         data = get_json_name(name)
         with open("./data/profile/"+name+".json", "w") as file:
             file.write(data)
@@ -114,7 +115,6 @@ def find_isbn_name(name):
                 isbn = data['books'][book_id]['ISBN_cleaned']
                 if isbn == '':  # find missing isbn
                     title = data['books'][book_id]['title']
-                    print 'Retrieving isbn for %s...' % title
                     sleep(1)
                     isbn = get_isbn_title(title)
                     result.append(isbn)
@@ -135,6 +135,7 @@ def get_work_isbn(isbn):
     >>>get_work_isbn('0957219008')
     12569876
     """
+    print 'Retrieving data for %s...' % isbn
     base = 'http://www.librarything.com/'
     try:
         xml = urlopen(base+"api/whatwork.php?isbn="+isbn)
@@ -189,7 +190,6 @@ def find_work_isbn(name):
                 works.append(work)
                 found.append(isbn)
             elif isbn != 'NA':
-                print 'Retrieving data for %s...' % isbn
                 sleep(1)
                 work = get_work_isbn(isbn)
                 if work != 'NA':
@@ -204,7 +204,6 @@ def find_work_isbn(name):
         record = json.dumps({name: works})
         name_repository.write(record)
     return works
-
 
 #print find_isbn_name('Jon.Roemer')
 #print find_work_isbn('Jon.Roemer')
