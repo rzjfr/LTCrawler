@@ -25,8 +25,13 @@ def get_all_friends(name):
     """
     print 'Retrieving friends list for %s...' % name
     url = 'http://www.librarything.com/profile/' + quote(name)
+    result = []
+    friends = None  # to solve pass 403 error
     try:
         html = urlopen(url)
+        html = BeautifulSoup(html.read())
+        friends = html.find('div',
+                            attrs={'class': 'profileactionsection first'})
     except HTTPError, err:
         if err.code == 404:
             log("Page not found!")
@@ -36,17 +41,16 @@ def get_all_friends(name):
             log("Error "+str(err.code))
     except URLError, err:
         log(str(err.reason))
-    html = BeautifulSoup(html.read())
-    result = []
-    friends = html.find('div',
-                        attrs={'class': 'profileactionsection first'})
     if not friends:
         log('no date for %s' % name)
     elif friends("p")[0].text == "No connections":
         return result
     else:
-        for friend in friends('a'):
-            result.append(friend.text)
+        if friends.find('p'):
+            friends = friends.find('p')
+        if friends.find('b').text == 'Friends:':
+            for friend in friends('a'):
+                result.append(friend.text)
     return result
 
 
@@ -70,3 +74,6 @@ def find_friends(name):
     return friends
 
 #print find_friends('Movielizard')
+#print find_friends('gothic_cowgirl')
+#print get_all_friends('CLHarris')
+#print get_all_friends('sfreads')
