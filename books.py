@@ -3,6 +3,7 @@ from urllib2 import *
 from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from time import sleep
+import re
 
 
 def log(message):
@@ -46,6 +47,7 @@ def get_work_title_retry(title):
     """(str)->str
     dsc: find work from given title if not found from isbn
     """
+    print 'Retrieving isbn for %s...' % title
     key = 'ba4a76cea44a763da0317089b6b4c103'
     url = """http://www.librarything.com/services/rest/1.1/
 ?method=librarything.ck.getwork&name=%s&apikey=%s""" % (quote(title), key)
@@ -156,6 +158,35 @@ def get_work_isbn(isbn):
         return 'NA'
 
 
+def get_compare_book(member_a, member_b):
+    """(str, str)->int
+    dsc: compares books for each member and returns number of same books
+    >>>get_compare_book('Des2', 'Jon.Roemer')
+    43
+    """
+    print 'Retrieving data to compare %s and %s...' % (member_a, member_b)
+    base = 'http://www.librarything.com/'
+    url = 'catalog_bottom.php?view=%s&compare=%s' % (member_a, member_b)
+    print base+url
+    try:
+        html = urlopen(base+url)
+        html = BeautifulSoup(html.read())
+        if html.find('td', attrs={'class': 'pbGroup'}):
+            text = html.find('td', attrs={'class': 'pbGroup'}).text
+            if re.search('(?<=of) \d*', text):
+                return re.search('(?<=of) \d*', text).group(0)[1:]
+    except HTTPError, err:
+        if err.code == 404:
+            log("Page not found!")
+        elif err.code == 403:
+            log("Access denied!")
+        else:
+            log("Error "+str(err.code))
+    except URLError, err:
+        log(str(err.reason))
+    return 'NA'
+
+
 def find_work_isbn(name):
     """(str)->dict
     dsc: returns a list of books workid for given member
@@ -207,3 +238,4 @@ def find_work_isbn(name):
 
 #print find_isbn_name('Jon.Roemer')
 #print find_work_isbn('Jon.Roemer')
+#print get_compare_book('Des2', 'Jon.Roemer')
