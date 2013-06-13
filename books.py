@@ -158,16 +158,15 @@ def get_work_isbn(isbn):
         return 'NA'
 
 
-def get_compare_book(member_a, member_b):
-    """(str, str)->int
+def get_compare_books(member_a, member_b):
+    """(str, str)->str
     dsc: compares books for each member and returns number of same books
-    >>>get_compare_book('Des2', 'Jon.Roemer')
+    >>>get_compare_books('Des2', 'Jon.Roemer')
     43
     """
     print 'Retrieving data to compare %s and %s...' % (member_a, member_b)
     base = 'http://www.librarything.com/'
     url = 'catalog_bottom.php?view=%s&compare=%s' % (member_a, member_b)
-    print base+url
     try:
         html = urlopen(base+url)
         html = BeautifulSoup(html.read())
@@ -185,6 +184,33 @@ def get_compare_book(member_a, member_b):
     except URLError, err:
         log(str(err.reason))
     return 'NA'
+
+
+def find_compare_books(user_a, user_b):
+    """(str, str)->str
+    dsc: compare # of same books for each user.find from local or get it online
+    """
+    # if we have the information on disk
+    with open('./data/compare.csv', 'r') as name_repository:
+        for line in name_repository:
+            record = line.rstrip()
+            record = record.split(',')
+            a = record[0]
+            b = record[1]
+            count = record[2]
+            right_order = user_a == a and user_b == b
+            misplaced = user_a == b and user_b == a
+            if right_order or misplaced:
+                return count
+    # we don't have it, get it from website
+    count = get_compare_books(user_a, user_b)
+    if count == 'NA':  # retry one more time
+        count = get_compare_books(user_a, user_b)
+
+    with open('data/compare.csv', 'a') as name_repository:
+        record = ','.join([user_a, user_b, count+'\n'])
+        name_repository.write(record)
+    return count
 
 
 def find_work_isbn(name):
@@ -238,4 +264,5 @@ def find_work_isbn(name):
 
 #print find_isbn_name('Jon.Roemer')
 #print find_work_isbn('Jon.Roemer')
-#print get_compare_book('Des2', 'Jon.Roemer')
+print find_compare_books('Des2', 'Jon.Roemer')
+print find_compare_books('scducharme', 'CatsLiteracy')
