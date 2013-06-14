@@ -24,6 +24,7 @@ def get_isbn_title(title):
     """
     print 'Retrieving isbn for %s...' % title
     url = 'http://www.librarything.com/api/thingTitle/'
+    title = title.encode('utf-8')
     try:
         xml = urlopen(url+title)
     except HTTPError, err:
@@ -158,10 +159,10 @@ def get_work_isbn(isbn):
         return 'NA'
 
 
-def get_compare_books(member_a, member_b):
+def get_shared_books(member_a, member_b):
     """(str, str)->str
     dsc: compares books for each member and returns number of same books
-    >>>get_compare_books('Des2', 'Jon.Roemer')
+    >>>get_shared_books('Des2', 'Jon.Roemer')
     43
     """
     print 'Retrieving data to compare %s and %s...' % (member_a, member_b)
@@ -186,7 +187,7 @@ def get_compare_books(member_a, member_b):
     return 'NA'
 
 
-def find_compare_books(user_a, user_b):
+def find_shared_books(user_a, user_b):
     """(str, str)->str
     dsc: compare # of same books for each user.find from local or get it online
     """
@@ -203,14 +204,26 @@ def find_compare_books(user_a, user_b):
             if right_order or misplaced:
                 return count
     # we don't have it, get it from website
-    count = get_compare_books(user_a, user_b)
+    count = get_shared_books(user_a, user_b)
     if count == 'NA':  # retry one more time
-        count = get_compare_books(user_a, user_b)
+        count = get_shared_books(user_a, user_b)
 
     with open('data/compare.csv', 'a') as name_repository:
         record = ','.join([user_a, user_b, count+'\n'])
         name_repository.write(record)
     return count
+
+
+def find_shared_books(user_a, user_b):
+    """(str, str)->str
+    """
+    works_a = find_work_isbn(user_a)
+    works_b = find_work_isbn(user_b)
+    result = []
+    for work in works_a:
+        if work in works_b:
+            result.append(work)
+    return result
 
 
 def find_work_isbn(name):
@@ -259,10 +272,8 @@ def find_work_isbn(name):
     isbn_repository.close()
     with open('./data/books.json', 'a') as name_repository:
         record = json.dumps({name: works})
-        name_repository.write(record)
+        name_repository.write(record+'\n')
     return works
 
-#print find_isbn_name('Jon.Roemer')
-#print find_work_isbn('Jon.Roemer')
-print find_compare_books('Des2', 'Jon.Roemer')
-print find_compare_books('scducharme', 'CatsLiteracy')
+#print len(find_shared_books('Des2', 'Jon.Roemer'))
+#print len(find_shared_books('scducharme', 'CatsLiteracy'))
