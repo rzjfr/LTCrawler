@@ -4,6 +4,7 @@ from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from time import sleep
 import re
+import mechanize
 
 
 def log(message):
@@ -214,18 +215,6 @@ def find_shared_books(user_a, user_b):
     return count
 
 
-def find_shared_books(user_a, user_b):
-    """(str, str)->str
-    """
-    works_a = find_work_isbn(user_a)
-    works_b = find_work_isbn(user_b)
-    result = []
-    for work in works_a:
-        if work in works_b:
-            result.append(work)
-    return result
-
-
 def find_work_isbn(name):
     """(str)->dict
     dsc: returns a list of books workid for given member
@@ -275,5 +264,72 @@ def find_work_isbn(name):
         name_repository.write(record+'\n')
     return works
 
-#print len(find_shared_books('Des2', 'Jon.Roemer'))
-#print len(find_shared_books('scducharme', 'CatsLiteracy'))
+
+def find_shared_books_2(user_a, user_b, f):
+    """(str, str, funcrion)->str
+    find shared books of two users with given find books function
+    """
+    works_a = f(user_a)
+    works_b = f(user_b)
+    result = []
+    for work in works_a:
+        if work in works_b:
+            result.append(work)
+    return result
+
+
+def get_books(name):
+    """('str')->list
+    get all unique works of given name from html page and save all in one file
+    """
+    user_agent = """Mozilla/5.0 (X11; U; Linux i686;
+ en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1"""
+    user_agent = user_agent.replace("\n", "")
+    agent = mechanize.Browser()
+    agent.addheaders = [('User-agent', user_agent)]
+    url = 'http://www.librarything.com/catalog_bottom.php?view=%s' % name
+    browser = agent.open(url)
+    repeat = True
+    htmls = []
+    books = []
+    while repeat:
+        htmls.append(browser.read())
+        has_next_page = re.search('\>next page\<\/a\>', htmls[-1])
+        books.extend(re.findall('/work/(\d+)/', htmls[-1]))
+        i = re.search('(<td class="pbGroup">\d{1,7} &ndash; )(.{6,20})(</td>)'
+                      , htmls[-1])
+        print 'downloading %s for %s...' % (i.group(2), name)
+        if has_next_page:
+            offset = str(50*len(htmls))
+            url = """http://www.librarything.com/catalog_bottom.php?
+view=%s&offset=%s""" % (name, offset)
+            url = url.replace("\n", "")
+            sleep(0.5)
+            browser = agent.open(url)
+        else:
+            repeat = False
+    print '%d pages crawled for %s' % (len(htmls), name)
+    # save all pages in one file
+    with open('./data/profile/html/%s.html' % name, 'w') as name_repository:
+        content = '\n'.join(htmls)
+        name_repository.write(content)
+    return list(set(books))  # return unique set of works
+
+
+def find_books(name):
+    """('str')->list
+    find all unique works of given name (version 2, from html)
+    """
+    try:  # make sure the file exist
+        with open('./data/profile/html/'+name+'.html', 'r') as file:
+            data = file.read()
+        books = re.findall('/work/(\d+)/', data)
+        books = list(set(books))
+    except IOError:  # otherwise get it and save it  for further use
+        books = get_books(name)
+    return books
+
+
+#print len(find_shared_books_2('Des2', 'Jon.Roemer', find_books))
+#print len(find_shared_books_2('scducharme', 'CatsLiteracy', find_work_isbn))
+#print len(find_shared_books_2('scducharme', 'CatsLiteracy', find_books))
