@@ -288,7 +288,14 @@ def get_books(name):
     agent = mechanize.Browser()
     agent.addheaders = [('User-agent', user_agent)]
     url = 'http://www.librarything.com/catalog_bottom.php?view=%s' % name
-    browser = agent.open(url)
+    try:
+        browser = agent.open(url)
+    except HTTPError, err:
+        log("Error "+str(err.code))
+        return 'NA'
+    except URLError, err:
+        log(str(err.reason))
+        return 'NA'
     repeat = True
     htmls = []
     books = []
@@ -298,6 +305,9 @@ def get_books(name):
         books.extend(re.findall('/work/(\d+)/', htmls[-1]))
         i = re.search('(<td class="pbGroup">\d{1,7} &ndash; )(.{6,20})(</td>)'
                       , htmls[-1])
+        if i is None:
+            log('book list for %s is NA' % name)
+            break
         print 'downloading %s for %s...' % (i.group(2), name)
         if has_next_page:
             offset = str(50*len(htmls))
@@ -305,7 +315,14 @@ def get_books(name):
 view=%s&offset=%s""" % (name, offset)
             url = url.replace("\n", "")
             sleep(0.5)
-            browser = agent.open(url)
+            try:
+                browser = agent.open(url)
+            except HTTPError, err:
+                log("Error "+str(err.code))
+                return 'NA'
+            except URLError, err:
+                log(str(err.reason))
+                return 'NA'
         else:
             repeat = False
     print '%d pages crawled for %s' % (len(htmls), name)
