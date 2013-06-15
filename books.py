@@ -347,6 +347,65 @@ def find_books(name):
     return books
 
 
+def get_reviews(work):
+    """(str)->list
+    dsc: get all reviews of given book work id
+    """
+    junk = ['!', '@', '#', '$', '%', '&', '*', '(', ')','--', '_ ', '...', '|',
+            '+', '=', '.', ',', ':', '~', '<', '>', '\'', '\"', '\\', '{', '}',
+            '[', ']', '\xe2\x80\x93', '\xe2\x80\x94', '\xc2\xab', '?', '/',
+            '\xe2\x80\x9c', '\xe2\x80\x99', '\xe2\x80\x9d', '\xc2\xbb', '- ']
+    url = """http://www.librarything.com/ajax_profilereviews.php?offset=0
+&type=3&showCount=10000&workid=%s&languagePick=en&mode=profile""" % work
+    url = url.replace('\n', '')
+    result = []
+    try:
+        html = urlopen(url)
+        html = BeautifulSoup(html.read())
+        reviews = html.findAll('div', attrs={'class': 'bookReview'})
+        if reviews:
+            for review in reviews:
+                text = review.find('div', attrs={'class': 'commentText'}).text
+                text = text.encode('utf-8')
+                cntl_itm = review.find('span', attrs={'class': 'controlItems'})
+                user = cntl_itm.find('a').text
+                rv_lnk = review.find('span', attrs={'class': 'rating'})
+                if rv_lnk:
+                    rv_txt = rv_lnk.find('img')['src']
+                    rank = re.search('ss(\d+).gif', rv_txt).group(1)
+                else:
+                    rank = 'NA'
+                result.append({'name': user, 'text': text, 'rank': rank})
+    except HTTPError, err:
+        log("Error # "+str(err.code))
+        return result
+    except URLError, err:
+        log(str(err.reason))
+        return result
+    return result
+
+
+def find_reviews(work):
+    """(str)->list
+    dsc: get all reviews of given book work id if not exist in local storage
+    """
+    # if we have the information local
+    with open('./data/book_review.json', 'r') as book_repository:
+        for line in book_repository:
+            record = json.loads(line)
+            if work in record.keys():
+                return record[work]
+    with open('./data/book_review.json', 'a') as book_repository:
+        review = get_reviews(work)
+        if review != []:
+            record = json.dumps({work: review})
+            book_repository.write(record+'\n')
+        else:
+            log('no review found for work with id %s' % work)
+            return 'NA'
+    return review
+
+#print find_reviews('1060')
 #print len(find_shared_books_2('Des2', 'Jon.Roemer', find_books))
 #print len(find_shared_books_2('scducharme', 'CatsLiteracy', find_work_isbn))
 #print len(find_shared_books_2('scducharme', 'CatsLiteracy', find_books))
