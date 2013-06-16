@@ -42,9 +42,27 @@ def get_all_friends(name):
     except URLError, err:
         log(str(err.reason))
     if not friends:
-        log('no date for %s' % name)
+        alert = html.find('p', attrs={'class': 'alert'})
+        profile = html.find('div', attrs={'class': 'memberprofile'})
+        if alert:
+            log('No data for %s: %s' % (name, alert.text[:-1]))
+            return 'Removed'
+        elif profile:
+            log('No data for %s: user data is private')
+            return 'Private'
+        else:
+            alert = html.find('p')
+            if alert:
+                msg = alert.text[22:-1]
+                if msg == 'User has been deleted or never existed':
+                    log('No data for %s: %s' % (name, msg))
+                    return 'Not exist'
+                else:
+                    log('No data for %s: Unknown Problem' % name)
+                    return 'NA'
     elif friends("p")[0].text == "No connections":
-        return result
+        log('No data for %s: No connection' % name)
+        return 'No connection'
     else:
         if friends.find('p'):
             friends = friends.find('p')
@@ -73,6 +91,10 @@ def find_friends(name):
         name_repository.write(record+'\n')
     return friends
 
+#print get_all_friends('Zaki_Jalil')
+#print get_all_friends('Mysterion')
+#print get_all_friends('razorsoccamsells')
+#print get_all_friends('vchia')
 #print find_friends('Movielizard')
 #print find_friends('gothic_cowgirl')
 #print get_all_friends('CLHarris')
