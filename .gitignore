@@ -8,5 +8,5 @@ data
 *.dat
 *.sql
 *.xml
-
+*.log
 *.pyc

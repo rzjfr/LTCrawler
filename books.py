@@ -5,16 +5,7 @@ from datetime import datetime
 from time import sleep
 import re
 import mechanize
-
-
-def log(message):
-    """(str)->None
-    dsc: logging
-    """
-    date = str(datetime.now())
-    with open("./data/book.log", "a") as file:
-        file.write(date+" "+message+"\n")
-    print("Error: "+message+", more information in book.log")
+from HelperMethods import *
 
 
 def get_isbn_title(title):
@@ -30,13 +21,13 @@ def get_isbn_title(title):
         xml = urlopen(url+title)
     except HTTPError, err:
         if err.code == 404:
-            log("Page not found!")
+            log("Page not found!", 'Error')
         elif err.code == 403:
-            log("Access denied!")
+            log("Access denied!", 'Error')
         else:
-            log("Error "+str(err.code))
+            log("Error "+str(err.code), 'Error')
     except URLError, err:
-        log(str(err.reason))
+        log(str(err.reason), 'Error')
     xml = BeautifulSoup(xml.read())
     if xml.find('isbn'):
         return xml.find('isbn').text
@@ -58,13 +49,13 @@ def get_work_title_retry(title):
         xml = urlopen(url)
     except HTTPError, err:
         if err.code == 404:
-            log("Page not found!")
+            log("Page not found!", 'Error')
         elif err.code == 403:
-            log("Access denied!")
+            log("Access denied!", 'Error')
         else:
-            log("Error "+str(err.code))
+            log("Error "+str(err.code), 'Error')
     except URLError, err:
-        log(str(err.reason))
+        log(str(err.reason), 'Error')
     xml = BeautifulSoup(xml.read())
     if xml.find('item'):
         return xml.find('item')['id']+'W'  # add 'W' to ditinguish from isbn
@@ -87,13 +78,13 @@ reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
         respond = urlopen(url)
     except HTTPError, err:
         if err.code == 404:
-            log("Page not found!")
+            log("Page not found!", 'Error')
         elif err.code == 403:
-            log("Access denied!")
+            log("Access denied!", 'Error')
         else:
-            log("Error "+str(err.code))
+            log("Error "+str(err.code), 'Error')
     except URLError, err:
-        log(str(err.reason))
+        log(str(err.reason), 'Error')
     data = respond.read()
     return data
 
@@ -145,13 +136,13 @@ def get_work_isbn(isbn):
         xml = urlopen(base+"api/whatwork.php?isbn="+isbn)
     except HTTPError, err:
         if err.code == 404:
-            log("Page not found!")
+            log("Page not found!", 'Error')
         elif err.code == 403:
-            log("Access denied!")
+            log("Access denied!", 'Error')
         else:
-            log("Error "+str(err.code))
+            log("Error "+str(err.code), 'Error')
     except URLError, err:
-        log(str(err.reason))
+        log(str(err.reason), 'Error')
     xml = BeautifulSoup(xml.read())
     if xml.find('work'):
         return xml.find('work').text
@@ -178,13 +169,13 @@ def get_shared_books(member_a, member_b):
                 return re.search('(?<=of) \d*', text).group(0)[1:]
     except HTTPError, err:
         if err.code == 404:
-            log("Page not found!")
+            log("Page not found!", 'Error')
         elif err.code == 403:
-            log("Access denied!")
+            log("Access denied!", 'Error')
         else:
-            log("Error "+str(err.code))
+            log("Error "+str(err.code), 'Error')
     except URLError, err:
-        log(str(err.reason))
+        log(str(err.reason), 'Error')
     return 'NA'
 
 
@@ -303,8 +294,8 @@ def get_books(name):
         htmls.append(browser.read())
         has_next_page = re.search('\>next page\<\/a\>', htmls[-1])
         books.extend(re.findall('/work/(\d+)/', htmls[-1]))
-        i = re.search('(<td class="pbGroup">\d{1,7} &ndash; )(.{6,20})(</td>)'
-                      , htmls[-1])
+        i = re.search('(<td class="pbGroup">\d{1,7} &ndash; )(.{6,20})(</td>)',
+                      htmls[-1])
         if i is None:
             log('book list for %s is NA' % name)
             break
@@ -351,10 +342,6 @@ def get_reviews(work):
     """(str)->list
     dsc: get all reviews of given book work id
     """
-    junk = ['!', '@', '#', '$', '%', '&', '*', '(', ')','--', '_ ', '...', '|',
-            '+', '=', '.', ',', ':', '~', '<', '>', '\'', '\"', '\\', '{', '}',
-            '[', ']', '\xe2\x80\x93', '\xe2\x80\x94', '\xc2\xab', '?', '/',
-            '\xe2\x80\x9c', '\xe2\x80\x99', '\xe2\x80\x9d', '\xc2\xbb', '- ']
     url = """http://www.librarything.com/ajax_profilereviews.php?offset=0
 &type=3&showCount=10000&workid=%s&languagePick=en&mode=profile""" % work
     url = url.replace('\n', '')

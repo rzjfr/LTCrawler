@@ -3,16 +3,7 @@ from urllib2 import *
 from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from time import sleep
-
-
-def log(message):
-    """(str)->None
-    dsc: logging
-    """
-    date = str(datetime.now())
-    with open("./data/tags.log", "a") as file:
-        file.write(date+" "+message+"\n")
-    print("Error: "+message+", more information in tags.log")
+from HelperMethods import *
 
 
 def get_all_tag_work(work):
@@ -26,13 +17,13 @@ def get_all_tag_work(work):
         html = urlopen(url)
     except HTTPError, err:
         if err.code == 404:
-            log("Page not found!")
+            log("Page not found!", 'Error')
         elif err.code == 403:
-            log("Access denied!")
+            log("Access denied!", 'Error')
         else:
-            log("Error "+str(err.code))
+            log("Error "+str(err.code), 'Error')
     except URLError, err:
-        log(str(err.reason))
+        log(str(err.reason), 'Error')
     html = BeautifulSoup(html.read())
     result = {}
     tags = html.findAll('span', attrs={'class': 'tag'})

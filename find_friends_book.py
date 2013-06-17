@@ -2,33 +2,7 @@ import books
 import friends
 import members
 import json
-
-
-def load_local_friends():
-    """()->dict
-    dsc: loads all friends list from file
-    """
-    result = {}
-    with open('./data/friends.json', 'r') as name_repository:
-        for line in name_repository:
-            record = json.loads(line)
-            result.update(record)
-    return result
-
-
-def all_local_members():
-    """()->dict
-    dsc: loads all members in friends file
-    """
-    result = []
-    with open('./data/friends.json', 'r') as name_repository:
-        for line in name_repository:
-            record = json.loads(line)
-            result.extend(record.keys())
-            if record.values()[0].__class__ == list:
-                result.extend(record.values()[0])
-    result = list(set(result))
-    return result
+from HelperMethods import *
 
 
 def find_missing_friends(members, known):
