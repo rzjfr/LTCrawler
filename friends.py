@@ -35,20 +35,24 @@ def get_all_friends(name):
     except HTTPError, err:
         if err.code == 404:
             log("Page not found!")
+            return 'No access'
         elif err.code == 403:
             log("Access denied!")
+            return 'No access'
         else:
             log("Error "+str(err.code))
+            return 'No access'
     except URLError, err:
         log(str(err.reason))
+        return 'No access'
     if not friends:
         alert = html.find('p', attrs={'class': 'alert'})
-        profile = html.find('div', attrs={'class': 'memberprofile'})
+        profile = html.find('div', attrs={'class': 'profile'})
         if alert:
             log('No data for %s: %s' % (name, alert.text[:-1]))
             return 'Removed'
         elif profile:
-            log('No data for %s: user data is private')
+            log('No data for %s: user data is private' % name)
             return 'Private'
         else:
             alert = html.find('p')
@@ -69,6 +73,9 @@ def get_all_friends(name):
         if friends.find('b').text == 'Friends:':
             for friend in friends('a'):
                 result.append(friend.text)
+        else:
+            log('No data for %s: No list is available' % name)
+            return 'No list'
     return result
 
 
@@ -95,7 +102,9 @@ def find_friends(name):
 #print get_all_friends('Mysterion')
 #print get_all_friends('razorsoccamsells')
 #print get_all_friends('vchia')
+#print get_all_friends('newsativa')
 #print find_friends('Movielizard')
 #print find_friends('gothic_cowgirl')
 #print get_all_friends('CLHarris')
-#print get_all_friends('sfreads')
+#print get_all_friends('aakin')
+#print get_all_friends('DiannaN')
