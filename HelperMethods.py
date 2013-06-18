@@ -37,3 +37,64 @@ def all_local_members(path='./data/friends.json'):
                 result.extend(record.values()[0])
     result = list(set(result))
     return result
+
+
+def has_duplicate(friends):
+    """(list)->bool
+    dsc: to find out if we mixed conections of a member with friends
+    >>>has_duplicated([1, 1, 3])
+    True
+    >>>has_duplicated([1, 2, 3])
+    False
+    """
+    for i in xrange(len(friends)):
+        if friends[i] in friends[i+1:]:
+            return True
+    return False
+
+
+def remove_duplicate(all_members):
+    """(list)->list
+    dsc: remove all duplicated items from given list
+    # if user name data is not already in database
+    >>>remove_duplicate([2,2,3,3,6])
+    [2, 3, 6]
+    """
+    return list(set(all_members))
+
+
+def count_items(all_members, member):
+    """(list, str)-> int
+    dsc: find count of member in all member list
+    >>>count_items([2,2,3,3,6], 3)
+    2
+    """
+    result = 0
+    for item in all_members:
+        if item == member:
+            result += 1
+    return result
+
+
+def write_to_file(record, path='./new.json'):
+    """(str)->None
+    dsc: add line to exitsting file
+    """
+    with open(path, 'a') as f:
+        f.write(record+'\n')
+
+
+def find_value_by_key(friend):
+    """(str)->list
+    find all user names that has a specific user as a friend
+    """
+    result = []
+    with open('./friends.json.bak2', 'r') as member_repository:
+        for line in member_repository:
+            record = json.loads(line)
+            name = record.keys()[0]
+            friends = record.values()[0]
+            if friend in friends:
+                result.append(name)
+    return result
+
