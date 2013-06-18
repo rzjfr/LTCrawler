@@ -84,17 +84,27 @@ def write_to_file(record, path='./new.json'):
         f.write(record+'\n')
 
 
-def find_value_by_key(friend):
-    """(str)->list
+def find_key_by_value(user, dic):
+    """(str, dict)->list
     find all user names that has a specific user as a friend
     """
     result = []
-    with open('./friends.json.bak2', 'r') as member_repository:
-        for line in member_repository:
-            record = json.loads(line)
-            name = record.keys()[0]
-            friends = record.values()[0]
-            if friend in friends:
+    for name, friends in dic.items():
+        if friends.__class__ == list:
+            if user in friends:
+                result.append(name)
+        else:
+            if user == friends:
                 result.append(name)
     return result
 
+
+def find_null_friends(dic):
+    """(dict)->list
+    find all user names that has no friend list
+    """
+    result = []
+    for name, friends in dic.items():
+        if not friends:
+            result.append(name)
+    return result
