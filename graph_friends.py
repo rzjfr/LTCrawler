@@ -1,8 +1,10 @@
 import books
 import friends
-import members as M
 import json
 from HelperMethods import *
+from networkx import *
+import matplotlib.pyplot as plt
+from networkx import graphviz_layout
 
 
 def get_adjacancy_list(members):
@@ -33,9 +35,9 @@ def find_adjacancy_list(work):
             adj_list = load_local_friends(file_path)
     except IOError:  # otherwise calc it and save it  for further use
         # Note: this algorithm is very ineficient thats why we save the result
-        members = M.find_all_members(work)
+        members = books.find_all_members(work)
         print len(members)
-        print remove_duplicate(members)
+        print len(remove_duplicate(members))
         adj_list = get_adjacancy_list(members)
         print len(adj_list)
         for k, v in adj_list.items():
@@ -84,9 +86,10 @@ def clean_adj_list(adj_list, junk_nodes, null_nodes):
         print '%d item processed' % len(cleaned_adj_list)
         if name not in remove:
             cleaned_friends = []
-            for friend in friends:
-                if friend not in remove:
-                    cleaned_friends.append(friend)
+            if friends.__class__ == list:
+                for friend in friends:
+                    if friend not in remove:
+                        cleaned_friends.append(friend)
             cleaned_adj_list.update({name: cleaned_friends})
     return cleaned_adj_list
 
@@ -119,11 +122,35 @@ def make_cleand_adjacancy_list(adj_list):
     return adj_list
 
 
+def create_graph(adj_list):
+    """(dict)->module
+    dsc: create networkx Graph object form given adjacancy list
+    """
+    G = Graph()
+    G.add_nodes_from(adj_list.keys())
+    for name, friends in adj_list.items():
+        if friends.__class__ == list:
+            edges = zip([name]*len(friends), friends)
+            G.add_edges_from(edges)
+    return G
+
+
+def plot_graph(G):
+    """()->None
+    dsc: plots figure from given networkx graph object and saves it
+    """
+    plt.figure(figsize=(60, 30))
+    pos = nx.graphviz_layout(G, prog="neato")
+    draw(G, pos, node_size=100, font_size=2, edge_color='k', alpha=0.8)
+    plt.axis('off')
+    plt.savefig("friends_graph.svg", format='SVG')
+
+
 if __name__ == '__main__':
 
     work = '306947'
     work = '1576656'
-    members = M.find_all_members(work)
+    members = books.find_all_members(work)
     adj_list = find_adjacancy_list(work)
     adj_list = make_cleand_adjacancy_list(adj_list)
 
@@ -132,4 +159,5 @@ if __name__ == '__main__':
         if member not in adj_list:
             log('%s removed from adjacancy list' % member, 'Error')
 
-
+    G = create_graph(adj_list)
+    #print betweenness_centrality(G,normalized=False)
