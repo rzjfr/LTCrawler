@@ -1,7 +1,6 @@
 import books
 import re
 import nltk
-import tag
 import csv
 from nltk.corpus import wordnet
 from HelperMethods import *
@@ -94,7 +93,7 @@ def meaning_percent(words):
 text = reviews_text('1060')
 freq = word_frequency(text)
 word = list(sorted(freq, key=freq.__getitem__, reverse=True))
-tags = tag.find_all_tag_work('1060')
+tags = books.find_all_tag_work('1060')
 #same = []
 #find = {}
 #for k, v in freq.items():
