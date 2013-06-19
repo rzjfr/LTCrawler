@@ -1,7 +1,7 @@
 import books
 import friends
-import members
 import json
+import sys
 from HelperMethods import *
 
 
@@ -22,7 +22,7 @@ def find_friends_recursive(members, known):
     for each one recursively
     """
     i = 0
-    print members
+    #print members
     if members.__class__ == list:
         for name in members:
             i += 1
@@ -55,27 +55,25 @@ def find_friends_bfs(members, known):
     return list(set(users_to_find_next))
 
 if __name__ == '__main__':
-    #title = sys.argv[1]
+    #work = sys.argv[1]
     #work = books.get_work_title_retry(title)
-    #members = members.find_all_members(work[:-1])
-    #title = 'The Holy Bible: King James Version (KJV)'
-    #title = 'The Blind Watchmaker'
-    #title = 'Mere Christianity'
-    #title = 'The Holy Bible: Revised Standard Version (RSV)'
-    #title = 'The Holy Bible: New King James Version (NKJV)'
-    #title = 'The Holy Bible: New American Standard (NASB)'
-    #title = 'The God Delusion'
-    #work = '1576656'
-    #work = '306947'
-    #work = '1595966'
-    #work = '324481'
-    #work = '5503022'
-    #work = '5503098'
-    #work = '1429542'
-    #members = members.find_all_members(work)  # all members of given work
+    #members = books.find_all_members(work[:-1])
+    #work = '1576656'  # The Blind Watchmaker
+    #work = '306947'  # The Holy Bible: King James Version (KJV)
+    #work = '1595966'  # Mere Christianity
+    #work = '324481'  # The Holy Bible: Revised Standard Version (RSV)
+    #work = '5503022'  # The Holy Bible: New King James Version (NKJV)
+    #work = '5503098'  # The Holy Bible: New American Standard (NASB)
+    #work = '1429542'  # The God Delusion
+    #work = '34883'  # The End of Faith
+    #work = '274277'  # The New English Bible; New Testament
+    work = '2482940'  # God Is Not Great
+    members = books.find_all_members(work)  # all members of given work
     known = load_local_friends()  # all known usernames
     #users = find_friends_bfs(members, known)
-    #find_friends_recursive(members, known)
+    find_friends_recursive(members, known)
     all_members = all_local_members()
+    print 'finding friends for missing members...'
+    known = load_local_friends()  # all known usernames
     find_missing_friends(all_members, known)
-    #books.log('%s finished completely' % title)
+    books.log('work id %s finished completely' % work, 'Notification')
