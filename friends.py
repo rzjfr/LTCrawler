@@ -89,6 +89,61 @@ def find_friends(name):
         name_repository.write(record+'\n')
     return friends
 
+
+def get_all_tag_name(name):
+    """(str)->dic
+    dsc: get all tags and counts for given book
+    """
+    url = 'http://www.librarything.com/tagcloud.php?view=%s' % name
+    try:
+        html = urlopen(url)
+        html = BeautifulSoup(html.read())
+    except HTTPError, err:
+        if err.code == 404:
+            log("Page not found!", 'Error')
+        elif err.code == 403:
+            log("Access denied!", 'Error')
+        else:
+            log("Error "+str(err.code), 'Error')
+    except URLError, err:
+        log(str(err.reason), 'Error')
+    result = {}
+    tags_div = html.find('div', attrs={'class': 'tags'})
+    tags = tags_div.findAll('span')
+    for tag in tags:
+        if tag.find('a'):
+            tag_name = tag.find('a').text
+            count = tag.find('span', attrs={'class': 'count'}).text[1:-1]
+            if name in result:
+                log('tag %s for %s overwited' % (tag_name, name))
+            result.update({tag_name: count})
+    return result
+
+
+def find_all_tag_name(name):
+    """(str)->dict
+    dsc: find all tags from local storage otherwise download and save it
+    >>>find_all_tag_work('dummy')
+    {'11111': '24', '22222': '1'}
+    """
+    # if we had the information local
+    with open('./data/tags_user.json', 'r') as tag_repository:
+        for line in tag_repository:
+            record = json.loads(line)
+            if name in record.keys():
+                return record[name]
+    #if we don't have tags for given work id
+    print 'Downloading tag list for %s' % name
+    tags = get_all_tag_name(name)
+    #if tags != {}:
+    with open('./data/tags_user.json', 'a') as tag_repository:
+        record = json.dumps({name: tags})
+        tag_repository.write(record+'\n')
+        return record
+
+print find_all_tag_name('lissaleone')
+print find_all_tag_name('jared_doherty')
+print find_all_tag_name('MaryRose')
 #print get_all_friends('Zaki_Jalil')
 #print get_all_friends('Mysterion')
 #print get_all_friends('razorsoccamsells')
