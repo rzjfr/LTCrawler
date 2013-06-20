@@ -89,19 +89,28 @@ reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
     return data
 
 
+def find_json_name(name):
+    """(str)->str
+    dsc: finds json file for a given user name and returns it as string
+    """
+    try:  # if the file already exists
+        with open('./data/profile/'+name+'.json') as f:
+            print 'we already have data for %s' % name
+            data = f.read()
+    except IOError:  # otherwise get it and save it
+        data = get_json_name(name)
+        with open("./data/profile/"+name+".json", "w") as f:
+            f.write(data)
+    return data
+
+
 def find_isbn_name(name):
     """(srt) -> list
     dsc: return all isbn list of a given person
     >>>find_isbn_name("sds")
     []
     """
-    try:  # make sure the file exist
-        with open('./data/profile/'+name+'.json') as file:
-            data = file.read()
-    except IOError:  # otherwise get it and save it  for further use
-        data = get_json_name(name)
-        with open("./data/profile/"+name+".json", "w") as file:
-            file.write(data)
+    data = find_json_name(name)
     result = []
     if data:
         data = json.loads(data)
@@ -128,13 +137,7 @@ def find_bookids_name(name):
     """(srt) -> list
     dsc: gets all book ids of given user name
     """
-    try:  # make sure the file exist
-        with open('./data/profile/'+name+'.json') as file:
-            data = file.read()
-    except IOError:  # otherwise get it and save it  for further use
-        data = get_json_name(name)
-        with open("./data/profile/"+name+".json", "w") as file:
-            file.write(data)
+    data = find_json_name(name)
     result = []
     if data:
         data = json.loads(data)
