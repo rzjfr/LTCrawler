@@ -123,3 +123,10 @@ def pretify_time(seconds):
     else:
         print s
     return s
+
+
+def sort_dict(dic):
+    """(dict)->list
+    dsc: returns a list of given dictionary keys sorted by its value
+    """
+    return list(sorted(dic, key=dic.__getitem__, reverse=True))

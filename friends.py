@@ -140,7 +140,7 @@ def find_all_tag_name(name):
     with open('./data/tags_user.json', 'a') as tag_repository:
         record = json.dumps({name: tags})
         tag_repository.write(record+'\n')
-        return record
+    return tags
 
 
 def find_reviews(name):

@@ -1,4 +1,5 @@
 import books
+import friends
 import re
 import nltk
 import csv
@@ -17,19 +18,21 @@ def load_sentiment():
     return result
 
 
-def reviews_text(work):
-    """(str)->str
-    dsc: get all reviews in one big text documet
+def reviews_text(all_reviews, types='work'):
+    """(list)->str
+    dsc: returns all given reviews in one big text documet
     """
     junk = ['!', '@', '#', '$', '%', '&', '*', '(', ')', '--', '_ ', '...',
             '+', '=', '.', ',', ':', '~', '<', '>', '\'', '\"', '\\', '{', '}',
             '[', ']', '\xe2\x80\x93', '\xe2\x80\x94', '\xc2\xab', '?', '/',
             '\xe2\x80\x9c', '\xe2\x80\x99', '\xe2\x80\x9d', '\xc2\xbb', '- ',
             ' -', ';', '|']
-    all_reviews = books.find_reviews(work)
     text = ""
     for review in all_reviews:
-        text += review['text']
+        if types == 'work':
+            text += review['text']
+        else:
+            text += review
     text = text.encode('utf-8')
     text = text.lower()
     for item in junk:
@@ -42,7 +45,7 @@ def word_frequency(text):
     dsc: from document finds most used words
     """
     words = text.split()
-    words = list(set(words))
+    words = remove_duplicate(words)
     common_words = ['due', 'you', 'the', 'for', 'and', 'have', 'has', 'too',
                     'very', 'ill', 'them', 'your', 'them', 'would', 'been',
                     'mine', 'there', 'were', 'ing', 'his', 'her', 'that',
@@ -77,23 +80,30 @@ def point_reviews(sentiment, words):
     return point
 
 
-def meaning_percent(words):
-    """(list)->int
+def meaning_percent(words, data='data'):
+    """(list, text)->int
     dsc: how many of given words are in dictionary
     """
     result = 0
+    if len(words) == 0:
+        print 'This user has no reviews'
+        return 'NA'
     for word in words:
         if wordnet.synsets(word):
             result += 1
     result = (result / float(len(words))) * 100.0
-    print '%d' % result + '%'
+    print '%d' % result + '%' + ' of %s are meaningful' % data
     return result
 
 
-text = reviews_text('1060')
+#work = '1060'
+work = '306947'
+#work = '1576656'
+all_reviews = books.find_reviews(work)
+text = reviews_text(all_reviews, 'work')
 freq = word_frequency(text)
-word = list(sorted(freq, key=freq.__getitem__, reverse=True))
-tags = books.find_all_tag_work('1060')
+word = sort_dict(freq)
+tags = books.find_all_tag_work(work)
 #same = []
 #find = {}
 #for k, v in freq.items():
@@ -102,9 +112,25 @@ tags = books.find_all_tag_work('1060')
         #find.update({k: (float(tags[k].replace(',', '')) + v) / 2.0})
 #print sorted(find.iteritems(), key=lambda x: x[1], reverse=True)
 #print len(word), len(tags), len(same)
-
+#print point_reviews(sentiment, text.split())
+#print point_reviews(sentiment, tags)
+print 'work %s has %d tags, %d words in reviews' % (work, len(tags), len(word))
 sentiment = load_sentiment()
-print point_reviews(sentiment, text.split())
-print point_reviews(sentiment, tags)
-meaning_percent(tags)
-meaning_percent(word[:10])
+meaning_percent(tags.keys(), 'tags')
+meaning_percent(word[:10], 'words')
+
+print '\n'
+
+#name = 'Jon.Roemer'
+#name = 'MaryRose'
+#name = 'yangguy'
+#name = 'jocelynandersen'
+name = 'BrJohnDismas'
+all_reviews = friends.find_reviews(name)
+text = reviews_text(all_reviews, 'username')
+freq = word_frequency(text)
+word = sort_dict(freq)
+tags = friends.find_all_tag_name(name)
+print 'user %s has %d tags, %d words in reviews' % (name, len(tags), len(word))
+meaning_percent(tags.keys(), 'tags')
+meaning_percent(word[:10], 'words')

@@ -95,7 +95,6 @@ def find_json_name(name):
     """
     try:  # if the file already exists
         with open('./data/profile/'+name+'.json') as f:
-            print 'we already have data for %s' % name
             data = f.read()
     except IOError:  # otherwise get it and save it
         data = get_json_name(name)
@@ -472,7 +471,7 @@ def find_reviews(work):
             record = json.dumps({work: review})
             book_repository.write(record+'\n')
         else:
-            log('no review found for work with id %s' % work)
+            log('no review found for work with id %s' % work, 'Error')
             return 'NA'
     return review
 
