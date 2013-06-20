@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from time import time, sleep
 
 
 def log(message, types='Warning'):
@@ -108,3 +109,17 @@ def find_null_friends(dic):
         if not friends:
             result.append(name)
     return result
+
+
+def pretify_time(seconds):
+    """(int)->str
+    dsc: retruns output of f and prints how much time it took
+    """
+    s = seconds
+    if s / 60 >= 60:
+        print '%d\' %d\" %d' % (s / 3600, (s % 3600) / 60, (s % 3600) % 60)
+    elif s / 60 >= 1:
+        print '%d\" %d' % (s / 60, s % 60)
+    else:
+        print s
+    return s
