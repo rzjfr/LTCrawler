@@ -29,7 +29,7 @@ def find_adjacancy_list(work):
     dsc: loads all members of a work and save user name with all friends of her
     to a json file
     """
-    file_path = './%s_members.json' % work
+    file_path = './data/%s_members.json' % work
     try:  # if we have information alredy
         with open(file_path):
             adj_list = load_local_friends(file_path)
@@ -94,8 +94,8 @@ def clean_adj_list(adj_list, junk_nodes, null_nodes):
     return cleaned_adj_list
 
 
-def make_cleand_adjacancy_list(adj_list):
-    """(dict, str)->dict
+def make_cleand_adjacancy_list(adj_list, members):
+    """(dict, list)->dict
     dsc: make clean adjacancy list from given adj_list
     >>>make_cleand_adjacancy_list({1: [2, 4, 5], 2: [1, 6, 7, 8, 9], 3: [4],
                                    4: 'No connection', 5: 'No list',
@@ -146,18 +146,68 @@ def plot_graph(G):
     plt.savefig("friends_graph.svg", format='SVG')
 
 
-if __name__ == '__main__':
+def average_shortest_path_between(G, members_a, members_b):
+    """(object, list, list)->float
+    dsc: average of shortest path between to list of members
+    """
+    result = []
+    for member_a in remove_duplicate(members_a):
+        for member_b in remove_duplicate(members_b):
+            if has_path(G, member_a, member_b):
+                result.append(len(shortest_path(G, member_a, member_b)))
+            elif G.neighbors(member_a) == []:
+                result.append(0)
+    # find average for list
+    return sum(result)/float(len(result))
 
-    work = '306947'
-    work = '1576656'
-    members = books.find_all_members(work)
-    adj_list = find_adjacancy_list(work)
-    adj_list = make_cleand_adjacancy_list(adj_list)
+
+def same_users_between(members_a, members_b):
+    """(list, list)->list
+    dsc: returns a list of same users in two givn lists
+    """
+    result = []
+    for member in remove_duplicate(members_a):
+        if member in members_b:
+            result.append(member)
+    return remove_duplicate(result)
+
+
+if __name__ == '__main__':
+    work_a = '306947'  # The Holy Bible: King James Version (KJV)
+    members_a = books.find_all_members(work_a)
+    adj_list = find_adjacancy_list(work_a)
+    adj_list = make_cleand_adjacancy_list(adj_list, members_a)
 
     # make sure every member of work is in adjacancy list
-    for member in members:
+    for member in members_a:
         if member not in adj_list:
-            log('%s removed from adjacancy list' % member, 'Error')
+            log('%s removed from adjacancy list of %s' % (member, work_a),
+                'Error')
+
+    work_b = '1576656'  # The Blind Watchmaker
+    members_b = books.find_all_members(work_b)
+    adj_list_b = find_adjacancy_list(work_b)
+    adj_list_b = make_cleand_adjacancy_list(adj_list_b, members_b)
+
+    # make sure every member of work is in adjacancy list
+    for member in members_b:
+        if member not in adj_list_b:
+            log('%s removed from adjacancy list of %s' % (member, work_b),
+                'Error')
+
+    # create the big adjacanvy list for mambers of both books
+    adj_list.update(adj_list_b)
 
     G = create_graph(adj_list)
+    # print some usful statistics about Graph G
     #print betweenness_centrality(G,normalized=False)
+    print '%s has %d members' % (work_a, len(remove_duplicate(members_a)))
+    print '%s has %d members' % (work_b, len(remove_duplicate(members_b)))
+    same = same_users_between(members_a, members_b)
+    print 'and %s of them are in both works' % len(same)
+    avg = average_shortest_path_between(G, members_a, members_b)
+    print 'average shortest path between %s and %s  %f' % (work_a, work_b, avg)
+    avg = average_shortest_path_between(G, members_a, members_a)
+    print 'average shortest path between members of %s is %f' % (work_a, avg)
+    avg = average_shortest_path_between(G, members_b, members_b)
+    print 'average shortest path between members of %s is %f' % (work_b, avg)
