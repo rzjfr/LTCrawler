@@ -4,6 +4,7 @@ from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from time import sleep
 from HelperMethods import *
+from books import find_json_name
 
 
 def get_all_friends(name):
@@ -141,9 +142,33 @@ def find_all_tag_name(name):
         tag_repository.write(record+'\n')
         return record
 
-print find_all_tag_name('lissaleone')
-print find_all_tag_name('jared_doherty')
-print find_all_tag_name('MaryRose')
+
+def find_reviews(name):
+    """(str)->list
+    dsc: get all reviews of given book work id if not exist in local storage
+    """
+    # if we have the information local
+    data = find_json_name(name)
+    result = []
+    if data:
+        data = json.loads(data)
+        if 'books' in data.keys() and data['books']:
+            for book_id in data['books'].keys():
+                    #result.append(book_id)
+                if data['books'][book_id]['hasreview'] == '1':
+                    result.append(data['books'][book_id]['bookreview'])
+        else:
+            log('No review found for %s' % name, 'Warning')
+        return result
+    else:
+        log('No data is available for %s' % name, 'Error')
+    return result
+
+
+#print find_reviews('Jon.Roemer')
+#print find_all_tag_name('lissaleone')
+#print find_all_tag_name('jared_doherty')
+#print find_all_tag_name('MaryRose')
 #print get_all_friends('Zaki_Jalil')
 #print get_all_friends('Mysterion')
 #print get_all_friends('razorsoccamsells')
