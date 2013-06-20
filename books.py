@@ -66,7 +66,7 @@ def get_work_title_retry(title):
 
 def get_json_name(name):
     """(str)->str
-    dsc: find json file for given name
+    dsc: find json file for given user name
     """
     print 'Retrieving data for %s...' % name
     url = '''http://www.librarything.com/api_getdata.php?
@@ -122,6 +122,87 @@ def find_isbn_name(name):
     else:
         message = 'No data found for %s' % name
         log(message)
+
+
+def find_bookids_name(name):
+    """(srt) -> list
+    dsc: gets all book ids of given user name
+    """
+    try:  # make sure the file exist
+        with open('./data/profile/'+name+'.json') as file:
+            data = file.read()
+    except IOError:  # otherwise get it and save it  for further use
+        data = get_json_name(name)
+        with open("./data/profile/"+name+".json", "w") as file:
+            file.write(data)
+    result = []
+    if data:
+        data = json.loads(data)
+        if 'books' in data.keys() and data['books']:
+            for book_id in data['books'].keys():
+                    result.append(book_id)
+        else:
+            log('No data found for %s' % name, 'Error')
+        return result
+    else:
+        log('No data found for %s' % name, 'Error')
+
+
+def get_work_bookid(bookid):
+    """(str)->str
+    dsc: find work id for given book id
+    """
+    print 'Retrieving data for book with id: %s...' % bookid
+    url = 'http://www.librarything.com/work/book/%s' % bookid
+    #result = 'NA'
+    try:
+        html = urlopen(url)
+        html = html.read()
+        result = re.search('\/work\/(\d+)\/book\/', html).group(1)
+    except HTTPError, err:
+        if err.code == 404:
+            log("Page not found!", 'Error')
+        elif err.code == 403:
+            log("Access denied!", 'Error')
+        else:
+            log("Error "+str(err.code), 'Error')
+    except URLError, err:
+        log(str(err.reason), 'Error')
+    return result
+
+
+def find_work_bookid(bookid):
+    """"""
+    with open('./data/bookid.csv', 'r') as book_repository:
+        for line in book_repository:
+            record = line.rstrip()
+            record = record.split(',')
+            if record[0] == bookid:
+                return record[1]
+    # we don't have it, get it from website
+    work = get_work_bookid(bookid)
+    with open('data/bookid.csv', 'a') as book_repository:
+        record = ','.join([bookid, work+'\n'])
+        book_repository.write(record)
+    return work
+
+
+def find_work_name(name):
+    """(str)->list
+    dsc: find all works of a member
+    """
+    result = []
+    bookids = find_bookids_name(name)
+    i = 0
+    if bookids:
+        for bookid in bookids:
+            i += 1
+            print '%d of %d for %s' % (i, len(bookids), name)
+            work = find_work_bookid(bookid)
+            result.append(work)
+    else:
+        log('No data found for %s' % name, 'Error')
+    return result
 
 
 def get_work_isbn(isbn):
@@ -493,3 +574,7 @@ def find_all_tag_work(work):
 #print len(find_all_members('306947'))
 #print find_all_tag_work('306947')
 #print find_all_tag_work('dummy')
+#print len(remove_duplicate(find_bookids_name('CatsLiteracy')))
+#print len(remove_duplicate(find_work_name('CatsLiteracy')))
+#print find_work_bookid('85886431')
+#print find_work_bookid('71999056')
