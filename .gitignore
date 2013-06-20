@@ -11,3 +11,5 @@ figures
 *.xml
 *.log
 *.pyc
+*.edges
+*.gephi

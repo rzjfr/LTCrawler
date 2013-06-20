@@ -5,6 +5,18 @@ from HelperMethods import *
 from networkx import *
 import matplotlib.pyplot as plt
 from networkx import graphviz_layout
+from datetime import datetime
+
+
+def friends_list(members):
+    """(list)->dict
+    dsc: returns friend list for each member of given list
+    """
+    known = load_local_friends()  # all known usernames
+    result = {}
+    for member in members:
+        result.update({member: known[member]})
+    return result
 
 
 def get_adjacancy_list(members):
@@ -135,15 +147,29 @@ def create_graph(adj_list):
     return G
 
 
-def plot_graph(G):
+def plot_graph(G, a, b):
     """()->None
     dsc: plots figure from given networkx graph object and saves it
     """
-    plt.figure(figsize=(60, 30))
+    colors = []
+    for v in G:
+        if v in a and v in b:
+            colors.append('b')
+        elif v in a:
+            colors.append('r')
+        elif v in b:
+            colors.append('g')
+        else:
+            colors.append('y')
+
+    time_stamp = str(datetime.now())
+    plt.figure(figsize=(120, 60))
     pos = nx.graphviz_layout(G, prog="neato")
-    draw(G, pos, node_size=100, font_size=2, edge_color='k', alpha=0.8)
+    draw(G, pos, node_size=100, font_size=2, edge_color='k', alpha=0.8,
+         node_color=colors)
     plt.axis('off')
-    plt.savefig("friends_graph.svg", format='SVG')
+    plt.savefig("./figures/friends_graph_%s.svg" % time_stamp, format='SVG')
+    plt.savefig("./figures/friends_graph_%s.png" % time_stamp, format='PNG')
 
 
 def average_shortest_path_between(G, members_a, members_b):
@@ -172,8 +198,7 @@ def same_users_between(members_a, members_b):
     return remove_duplicate(result)
 
 
-if __name__ == '__main__':
-    work_a = '306947'  # The Holy Bible: King James Version (KJV)
+def analysis_1(work_a, work_b):
     members_a = books.find_all_members(work_a)
     adj_list = find_adjacancy_list(work_a)
     adj_list = make_cleand_adjacancy_list(adj_list, members_a)
@@ -184,7 +209,6 @@ if __name__ == '__main__':
             log('%s removed from adjacancy list of %s' % (member, work_a),
                 'Error')
 
-    work_b = '1576656'  # The Blind Watchmaker
     members_b = books.find_all_members(work_b)
     adj_list_b = find_adjacancy_list(work_b)
     adj_list_b = make_cleand_adjacancy_list(adj_list_b, members_b)
@@ -199,7 +223,6 @@ if __name__ == '__main__':
     adj_list.update(adj_list_b)
 
     G = create_graph(adj_list)
-    # print some usful statistics about Graph G
     #print betweenness_centrality(G,normalized=False)
     print '%s has %d members' % (work_a, len(remove_duplicate(members_a)))
     print '%s has %d members' % (work_b, len(remove_duplicate(members_b)))
@@ -211,3 +234,26 @@ if __name__ == '__main__':
     print 'average shortest path between members of %s is %f' % (work_a, avg)
     avg = average_shortest_path_between(G, members_b, members_b)
     print 'average shortest path between members of %s is %f' % (work_b, avg)
+
+
+if __name__ == '__main__':
+    work_a = '306947'  # The Holy Bible: King James Version (KJV)
+    work_b = '1576656'  # The Blind Watchmaker
+    #analysis_1(work_a, work_b)
+    members_a = books.find_all_members(work_a)
+    print len(remove_duplicate(members_a))
+    members_b = books.find_all_members(work_b)
+
+    adj_list = friends_list(members_a)
+    adj_list = make_cleand_adjacancy_list(adj_list, members_a)
+
+    adj_list_b = friends_list(members_b)
+    adj_list_b = make_cleand_adjacancy_list(adj_list_b, members_b)
+
+    adj_list.update(adj_list_b)
+
+    print len(adj_list)
+    G = create_graph(adj_list)
+    fh = open("test.edges", 'wb')
+    write_edgelist(G, fh, data=False)
+    #plot_graph(G, members_a, members_b)
