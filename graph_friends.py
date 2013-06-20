@@ -19,6 +19,20 @@ def friends_list(members):
     return result
 
 
+def remove_not_book_member(adj_list, all_members):
+    """(dict, list)-> adj_list
+    dsc: remove all other member except members in all_members from adj_list
+    """
+    result = {}
+    for name, friends in adj_list.items():
+        new_friends = []
+        for friend in friends:
+            if friend in all_members:
+                new_friends.append(friend)
+        result.update({name: new_friends})
+    return result
+
+
 def get_adjacancy_list(members):
     """(list)-> dict
     dsc: returns a list of friends and for given members
@@ -163,13 +177,14 @@ def plot_graph(G, a, b):
             colors.append('y')
 
     time_stamp = str(datetime.now())
-    plt.figure(figsize=(120, 60))
+    plt.figure(figsize=(60, 30))
     pos = nx.graphviz_layout(G, prog="neato")
     draw(G, pos, node_size=100, font_size=2, edge_color='k', alpha=0.8,
          node_color=colors)
     plt.axis('off')
     plt.savefig("./figures/friends_graph_%s.svg" % time_stamp, format='SVG')
     plt.savefig("./figures/friends_graph_%s.png" % time_stamp, format='PNG')
+    plt.savefig("./figures/friends_graph_%s.pdf" % time_stamp, format='PDF')
 
 
 def average_shortest_path_between(G, members_a, members_b):
@@ -198,6 +213,21 @@ def same_users_between(members_a, members_b):
     return remove_duplicate(result)
 
 
+def save_edges(G, d=False, name=''):
+    """
+    dsc: save all edges in a text file
+    """
+    if name != '':
+        file_name = './data/%s.edges' % name
+    else:
+        time_stamp = str(datetime.now())
+        name = 'graph' + time_stamp
+        file_name = './data/%s.edges' % name
+
+    f = open(file_name, 'wb')
+    write_edgelist(G, f, data=d)
+
+
 def analysis_1(work_a, work_b):
     members_a = books.find_all_members(work_a)
     adj_list = find_adjacancy_list(work_a)
@@ -223,23 +253,22 @@ def analysis_1(work_a, work_b):
     adj_list.update(adj_list_b)
 
     G = create_graph(adj_list)
+    save_edges(G, True, 'all_friends')
     #print betweenness_centrality(G,normalized=False)
     print '%s has %d members' % (work_a, len(remove_duplicate(members_a)))
     print '%s has %d members' % (work_b, len(remove_duplicate(members_b)))
     same = same_users_between(members_a, members_b)
     print 'and %s of them are in both works' % len(same)
-    avg = average_shortest_path_between(G, members_a, members_b)
-    print 'average shortest path between %s and %s  %f' % (work_a, work_b, avg)
-    avg = average_shortest_path_between(G, members_a, members_a)
-    print 'average shortest path between members of %s is %f' % (work_a, avg)
-    avg = average_shortest_path_between(G, members_b, members_b)
-    print 'average shortest path between members of %s is %f' % (work_b, avg)
+    #avg = average_shortest_path_between(G, members_a, members_b)
+    #print 'average shortest path between %s and %s %f' % (work_a, work_b, avg)
+    #avg = average_shortest_path_between(G, members_a, members_a)
+    #print 'average shortest path between members of %s is %f' % (work_a, avg)
+    #avg = average_shortest_path_between(G, members_b, members_b)
+    #print 'average shortest path between members of %s is %f' % (work_b, avg)
+    return G
 
 
-if __name__ == '__main__':
-    work_a = '306947'  # The Holy Bible: King James Version (KJV)
-    work_b = '1576656'  # The Blind Watchmaker
-    #analysis_1(work_a, work_b)
+def analysis_2(work_a, work_b):
     members_a = books.find_all_members(work_a)
     print len(remove_duplicate(members_a))
     members_b = books.find_all_members(work_b)
@@ -247,13 +276,33 @@ if __name__ == '__main__':
     adj_list = friends_list(members_a)
     adj_list = make_cleand_adjacancy_list(adj_list, members_a)
 
+    #G1 = create_graph(remove_not_book_member(adj_list, members_a))
+    #plot_graph(G1, members_a, members_b)
     adj_list_b = friends_list(members_b)
     adj_list_b = make_cleand_adjacancy_list(adj_list_b, members_b)
 
+    #G2 = create_graph(remove_not_book_member(adj_list_b, members_b))
+    #plot_graph(G2, members_a, members_b)
     adj_list.update(adj_list_b)
+    all_members = remove_duplicate(members_a + members_b)
+    adj_list = remove_not_book_member(adj_list, all_members)
 
     print len(adj_list)
     G = create_graph(adj_list)
-    fh = open("test.edges", 'wb')
-    write_edgelist(G, fh, data=False)
     #plot_graph(G, members_a, members_b)
+    #save_edges(G)
+    GC = connected_component_subgraphs(G)[0]  # Giant Component
+    center = sort_dict(closeness_centrality(GC))[0]
+    #center = sort_dict(eigenvector_centrality(GC))[0]
+    #center = sort_dict(betweenness_centrality(GC))[0]
+    #pos = graphviz_layout(G, prog="twopi", root=center)  # draw and save
+    return G
+
+
+if __name__ == '__main__':
+    work_a = '306947'  # The Holy Bible: King James Version (KJV)
+    work_b = '1576656'  # The Blind Watchmaker
+    members_a = books.find_all_members(work_a)
+    members_b = books.find_all_members(work_b)
+    #G = analysis_1(work_a, work_b)
+    G = analysis_2(work_a, work_b)
