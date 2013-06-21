@@ -6,6 +6,8 @@ from networkx import *
 import matplotlib.pyplot as plt
 from networkx import graphviz_layout
 from datetime import datetime
+import matplotlib.pyplot as pyplt
+import numpy as np
 
 
 def friends_list(members):
@@ -175,16 +177,35 @@ def plot_graph(G, a, b):
             colors.append('g')
         else:
             colors.append('y')
-
     time_stamp = str(datetime.now())
-    plt.figure(figsize=(60, 30))
-    pos = nx.graphviz_layout(G, prog="neato")
-    draw(G, pos, node_size=100, font_size=2, edge_color='k', alpha=0.8,
-         node_color=colors)
+    plt.figure(figsize=(120, 120))
+    #pos = nx.graphviz_layout(G, prog="neato")
+    #pos = graphviz_layout(G, prog="twopi", root='AsYouKnow_Bob')
+    draw(G, pos, node_size=100, font_size=4, edge_color='k', alpha=0.8,
+         node_color=colors, linewidths=0, width=0.2, edge_cmap=plt.cm.Blues)
     plt.axis('off')
-    plt.savefig("./figures/friends_graph_%s.svg" % time_stamp, format='SVG')
+    #plt.savefig("./figures/friends_graph_%s.svg" % time_stamp, format='SVG')
     plt.savefig("./figures/friends_graph_%s.png" % time_stamp, format='PNG')
-    plt.savefig("./figures/friends_graph_%s.pdf" % time_stamp, format='PDF')
+    #plt.savefig("./figures/friends_graph_%s.pdf" % time_stamp, format='PDF')
+
+
+def plot_hist(G):
+    """(object)->None
+    dsc: plots degree for each user
+    """
+    nodes_degree = [(i, len(G.neighbors(i))) for i in G.nodes()]
+    nodes_degree = sorted(nodes_degree, key=lambda x: x[1], reverse=True)
+    a = [i for i, j in nodes_degree]
+    b = [j for i, j in nodes_degree]
+    pos = np.arange(len(a))
+    #width = 1.0
+    time_stamp = str(datetime.now())
+    pyplt.figure(figsize=(300, 10))
+    ax = pyplt.axes()
+    ax.set_xticks(pos)
+    ax.set_xticklabels(a, rotation=30, size='small')
+    plt.bar(pos, b, color='r')
+    plt.savefig("./figures/degree_freq_%s.png" % time_stamp, format='PNG')
 
 
 def average_shortest_path_between(G, members_a, members_b):
@@ -217,15 +238,16 @@ def save_edges(G, d=False, name=''):
     """
     dsc: save all edges in a text file
     """
+    time_stamp = str(datetime.now())
     if name != '':
-        file_name = './data/%s.edges' % name
+        file_name = './data/graph/%s.edges' % name
     else:
-        time_stamp = str(datetime.now())
         name = 'graph' + time_stamp
-        file_name = './data/%s.edges' % name
+        file_name = './data/graph/%s.edges' % name
 
     f = open(file_name, 'wb')
     write_edgelist(G, f, data=d)
+    write_gexf(G, "./data/graph/graph%s%s.gexf" % (name, time_stamp))
 
 
 def analysis_1(work_a, work_b):
@@ -296,6 +318,7 @@ def analysis_2(work_a, work_b):
     #center = sort_dict(eigenvector_centrality(GC))[0]
     #center = sort_dict(betweenness_centrality(GC))[0]
     #pos = graphviz_layout(G, prog="twopi", root=center)  # draw and save
+    #plot_graph(GC, members_a, members_b)
     return G
 
 
@@ -305,4 +328,6 @@ if __name__ == '__main__':
     members_a = books.find_all_members(work_a)
     members_b = books.find_all_members(work_b)
     #G = analysis_1(work_a, work_b)
-    G = analysis_2(work_a, work_b)
+    #G = analysis_2(work_a, work_b)
+    #C = connected_component_subgraphs(G)[0]  # Giant Component
+    #plot_hist(C)

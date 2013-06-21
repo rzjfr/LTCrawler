@@ -576,7 +576,7 @@ def find_all_tag_work(work):
 #print len(find_all_members('306947'))
 #print find_all_tag_work('306947')
 #print find_all_tag_work('dummy')
-#print len(remove_duplicate(find_bookids_name('CatsLiteracy')))
+#print len(remove_duplicate(find_work_name('scducharme')))
 #print len(remove_duplicate(find_work_name('CatsLiteracy')))
 #print find_work_bookid('85886431')
 #print find_work_bookid('71999056')
