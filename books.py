@@ -404,7 +404,7 @@ view=%s&offset=%s""" % (name, offset)
     with open('./data/profile/html/%s.html' % name, 'w') as name_repository:
         content = '\n'.join(htmls)
         name_repository.write(content)
-    return list(set(books))  # return unique set of works
+    return remove_duplicate(books)
 
 
 def find_books(name):
@@ -415,7 +415,7 @@ def find_books(name):
         with open('./data/profile/html/'+name+'.html', 'r') as file:
             data = file.read()
         books = re.findall('/work/(\d+)/', data)
-        books = list(set(books))
+        books = remove_duplicate(books)
     except IOError:  # otherwise get it and save it  for further use
         books = get_books(name)
     return books
@@ -580,3 +580,5 @@ def find_all_tag_work(work):
 #print len(remove_duplicate(find_work_name('CatsLiteracy')))
 #print find_work_bookid('85886431')
 #print find_work_bookid('71999056')
+#print len(find_books('Jon.Roemer'))
+#print len(remove_duplicate(find_work_name('Jon.Roemer')))

@@ -163,7 +163,27 @@ def create_graph(adj_list):
     return G
 
 
-def plot_graph(G, a, b):
+def create_weighted_graph(adj_list):
+    """(dict)->object
+    dsc: node lables: books_read, book_group, rank_given
+         edge lables: shared_books, is_friend
+    """
+    G = Graph()
+    for name, friends in adj_list.items():
+        print name, friends
+        books_read = len(books.find_books(name))
+        G.add_node(name, read=books_read)
+        if friends.__class__ == list:
+            edges = zip([name]*len(friends), friends)
+            wieghted_edges = []
+            for a, b in edges:
+                shared = len(books.find_shared_books_2(a, b, books.find_books))
+                wieghted_edges.append((a, b, shared))
+            G.add_edges_from(wieghted_edges)
+    return G
+
+
+def plot_graph(G, a, b, node_lable='False', edge_lable='False'):
     """()->None
     dsc: plots figure from given networkx graph object and saves it
     """
@@ -181,8 +201,14 @@ def plot_graph(G, a, b):
     plt.figure(figsize=(120, 120))
     #pos = nx.graphviz_layout(G, prog="neato")
     #pos = graphviz_layout(G, prog="twopi", root='AsYouKnow_Bob')
-    draw(G, pos, node_size=100, font_size=4, edge_color='k', alpha=0.8,
-         node_color=colors, linewidths=0, width=0.2, edge_cmap=plt.cm.Blues)
+    if not node_lable and not edge_lable:
+        draw(G, pos, node_size=100, font_size=4, edge_color='k', alpha=0.8,
+             node_color=colors, linewidths=0, width=0.2)
+    elif node_lable:
+        sizes = [v for k, v in get_node_attributes(C, 'read').items()]
+        sizes = [((i/float(max(sizes)))*200) for i in sizes]  # max size is 200
+        draw(G, pos, node_size=sizes, font_size=4, edge_color='k', alpha=0.8,
+             node_color=colors, linewidths=0, width=0.2)
     plt.axis('off')
     #plt.savefig("./figures/friends_graph_%s.svg" % time_stamp, format='SVG')
     plt.savefig("./figures/friends_graph_%s.png" % time_stamp, format='PNG')
@@ -251,6 +277,7 @@ def save_edges(G, d=False, name=''):
 
 
 def analysis_1(work_a, work_b):
+    """"""
     members_a = books.find_all_members(work_a)
     adj_list = find_adjacancy_list(work_a)
     adj_list = make_cleand_adjacancy_list(adj_list, members_a)
@@ -291,6 +318,7 @@ def analysis_1(work_a, work_b):
 
 
 def analysis_2(work_a, work_b):
+    """"""
     members_a = books.find_all_members(work_a)
     print len(remove_duplicate(members_a))
     members_b = books.find_all_members(work_b)
@@ -319,7 +347,23 @@ def analysis_2(work_a, work_b):
     #center = sort_dict(betweenness_centrality(GC))[0]
     #pos = graphviz_layout(G, prog="twopi", root=center)  # draw and save
     #plot_graph(GC, members_a, members_b)
+    #plot_hist(GC)
     return G
+
+
+def analysis_3(work_a, work_b):
+    """"""
+    adj_list = friends_list(members_a)
+    adj_list = make_cleand_adjacancy_list(adj_list, members_a)
+    adj_list_b = friends_list(members_b)
+    adj_list_b = make_cleand_adjacancy_list(adj_list_b, members_b)
+    adj_list.update(adj_list_b)
+    all_members = remove_duplicate(members_a + members_b)
+    adj_list = remove_not_book_member(adj_list, all_members)
+
+    G = create_weighted_graph(adj_list)
+    C = connected_component_subgraphs(G)[0]  # Giant Component
+    plot_graph(G, members_a, members_b, node_lable='True')
 
 
 if __name__ == '__main__':
@@ -329,5 +373,4 @@ if __name__ == '__main__':
     members_b = books.find_all_members(work_b)
     #G = analysis_1(work_a, work_b)
     #G = analysis_2(work_a, work_b)
-    #C = connected_component_subgraphs(G)[0]  # Giant Component
-    #plot_hist(C)
+    G = analysis_3(work_a, work_b)
