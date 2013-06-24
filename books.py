@@ -501,22 +501,34 @@ def get_members_work(work):
     return result
 
 
-def find_all_members(work):
+def find_all_members(work, rank='all'):
     """(str)->list
     dsc: find all members of a given book
     """
+    result = []
     try:  # read content if file exits
         with open('./data/book/'+work+'.html') as f:
             data = f.read()
     except IOError:  # otherwise get it and save it  for further use
         data = get_members_work(work)
     data = BeautifulSoup(data)
-    links = data.findAll('a')
-    result = []
-    if links:
+    if rank == 'all':
+        links = data.findAll('a')
+        if links:
+            for a in links:
+                result.append(a['href'][9:])  # trim tags to get profile name
+    else:
+        links = []
+        ranks = data.findAll('img')
+        for i in rank:
+            if i == '0':
+                if data.find('b').text == 'No rating':
+                        links.extend(data.find('b').findNextSiblings('a'))
+            else:
+                links.extend(ranks[-int(i)].findNextSiblings('a'))
         for a in links:
-            result.append(a['href'][9:])  # trim achor tags to get profile name
-    return result
+            result.append(a['href'][9:])  # trim tags to get profile name
+    return sorted(result)
 
 
 def get_all_tag_work(work):
@@ -570,6 +582,8 @@ def find_all_tag_work(work):
         return record
 
 #print find_reviews('1060')
+#print find_all_members('306947',  # find only with no rank or more than 1 star
+                       #['0', '3', '4', '5', '6', '7', '8', '9', '10'])
 #print len(find_shared_books_2('Des2', 'Jon.Roemer', find_books))
 #print len(find_shared_books_2('scducharme', 'CatsLiteracy', find_work_isbn))
 #print len(find_shared_books_2('scducharme', 'CatsLiteracy', find_books))
