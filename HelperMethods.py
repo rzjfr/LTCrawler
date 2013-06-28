@@ -1,3 +1,12 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""
+Some general helper methods
+"""
+__all__ = ["all_local_members", "count_items", "find_key_by_value", "log",
+           "find_null_friends", "has_duplicate", "load_local_friends",
+           "remove_duplicate", "sort_dict", "write_to_file"]
+
 import json
 from datetime import datetime
 from time import time, sleep
@@ -26,8 +35,8 @@ def load_local_friends(path='./data/friends.json'):
 
 
 def all_local_members(path='./data/friends.json'):
-    """()->dict
-    dsc: loads all members in friends file
+    """()->list
+    dsc: returns all user names in friends file
     """
     result = []
     with open(path, 'r') as name_repository:
@@ -66,7 +75,7 @@ def remove_duplicate(all_members):
 
 def count_items(all_members, member):
     """(list, str)-> int
-    dsc: find count of member in all member list
+    dsc: find count of a member in all member list
     >>>count_items([2,2,3,3,6], 3)
     2
     """

@@ -1,3 +1,10 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""
+All methods related to user in LT
+"""
+__all__ = ["find_all_tag_name", "find_authors", "find_friends", "find_reviews"]
+
 import json
 from urllib2 import *
 from BeautifulSoup import BeautifulSoup
@@ -167,7 +174,9 @@ def find_reviews(name):
 
 def find_authors(name):
     """(str)->list
-    dsc: frim given user name returns all authors of the books that user read
+    dsc: from given user name returns all authors using json data file
+    >>>find_authors('rzjfr')
+    ['adamsdouglas']
     """
     data = find_json_name(name)
     result = []

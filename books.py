@@ -1,3 +1,13 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""
+All methods related to books in LT
+"""
+__all__ = ["find_all_members", "find_all_tag_work", "find_bookids_name",
+           "find_books", "find_isbn_name", "find_json_name", "find_reviews",
+           "find_shared_books", "find_shared_books_2", "find_work_isbn",
+           "find_work_name"]
+
 import json
 from urllib2 import *
 from BeautifulSoup import BeautifulSoup
@@ -38,7 +48,9 @@ def get_isbn_title(title):
 
 def get_work_title_retry(title):
     """(str)->str
-    dsc: find work from given title if not found from isbn
+    dsc: find workid from given title
+    >>>get_work_title_retry('Freckle Juice')[:-1]
+    '17'
     """
     print 'Retrieving isbn for %s...' % title
     key = 'ba4a76cea44a763da0317089b6b4c103'
@@ -66,7 +78,9 @@ def get_work_title_retry(title):
 
 def get_json_name(name):
     """(str)->str
-    dsc: find json file for given user name
+    dsc: returns json formated string for given user name.
+    API Documentations:
+    www.librarything.com/wiki/index.php/LibraryThing_JSON_Books_API
     """
     print 'Retrieving data for %s...' % name
     url = '''http://www.librarything.com/api_getdata.php?
@@ -85,13 +99,18 @@ reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
             log("Error "+str(err.code), 'Error')
     except URLError, err:
         log(str(err.reason), 'Error')
+    except ContentTooShortError:
+        log('Content too short for %s' % name, 'Error')
+        print('Retring...')
+        return get_json_name(name)
     data = respond.read()
     return data
 
 
 def find_json_name(name):
     """(str)->str
-    dsc: finds json file for a given user name and returns it as string
+    dsc: finds json file for a given user name and returns it as json formated
+    string
     """
     try:  # if the file already exists
         with open('./data/profile/'+name+'.json') as f:
@@ -105,9 +124,11 @@ def find_json_name(name):
 
 def find_isbn_name(name):
     """(srt) -> list
-    dsc: return all isbn list of a given person
+    dsc: return all isbn list of a given user name (with duplicates)
     >>>find_isbn_name("sds")
     []
+    >>>find_isbn_name("rzjfr")
+    ['0345453743']
     """
     data = find_json_name(name)
     result = []
@@ -134,7 +155,9 @@ def find_isbn_name(name):
 
 def find_bookids_name(name):
     """(srt) -> list
-    dsc: gets all book ids of given user name
+    dsc: gets all book ids of given user name from json data
+    >>>find_bookids_name('rzjfr')
+    ['97711987']
     """
     data = find_json_name(name)
     result = []
@@ -153,6 +176,8 @@ def find_bookids_name(name):
 def get_work_bookid(bookid):
     """(str)->str
     dsc: find work id for given book id
+    >>>get_work_bookid('97711987')
+    '9440376'
     """
     print 'Retrieving data for book with id: %s...' % bookid
     url = 'http://www.librarything.com/work/book/%s' % bookid
@@ -174,7 +199,11 @@ def get_work_bookid(bookid):
 
 
 def find_work_bookid(bookid):
-    """"""
+    """(str)->str
+    dsc: find work id for given book id from repository file or online
+    >>>find_work_bookid('97711987')
+    '9440376'
+    """
     with open('./data/bookid.csv', 'r') as book_repository:
         for line in book_repository:
             record = line.rstrip()
@@ -191,7 +220,9 @@ def find_work_bookid(bookid):
 
 def find_work_name(name):
     """(str)->list
-    dsc: find all works of a member
+    dsc: find all works of a member with find_bookids_name method
+    >>>find_work_name('rzjfr')
+    ['9440376']
     """
     result = []
     bookids = find_bookids_name(name)
@@ -236,7 +267,7 @@ def get_work_isbn(isbn):
 
 def get_shared_books(member_a, member_b):
     """(str, str)->str
-    dsc: compares books for each member and returns number of same books
+    dsc: get numbers of shared books for between two users using LT catalog
     >>>get_shared_books('Des2', 'Jon.Roemer')
     43
     """
@@ -264,7 +295,9 @@ def get_shared_books(member_a, member_b):
 
 def find_shared_books(user_a, user_b):
     """(str, str)->str
-    dsc: compare # of same books for each user.find from local or get it online
+    dsc: finds numbers of shared books for between two users using LT catalog
+    >>>find_shared_books('Des2', 'Jon.Roemer')
+    43
     """
     # if we have the information on disk
     with open('./data/compare.csv', 'r') as name_repository:
@@ -290,9 +323,10 @@ def find_shared_books(user_a, user_b):
 
 
 def find_work_isbn(name):
-    """(str)->dict
-    dsc: returns a list of books workid for given member
-    >>>find_isbn_name('dum')
+    """(str)->list
+    dsc: returns a list of workid for given user name
+    >>>find_isbn_name('rzjfr')
+    ['0345453743']
     """
     # if we had the information local
     with open('./data/books.json', 'r') as name_repository:
@@ -341,7 +375,7 @@ def find_work_isbn(name):
 
 def find_shared_books_2(user_a, user_b, f):
     """(str, str, funcrion)->str
-    find shared books of two users with given find books function
+    dsc: find shared books of two users with arbitrary find book works function
     """
     works_a = f(user_a)
     works_b = f(user_b)
@@ -354,7 +388,8 @@ def find_shared_books_2(user_a, user_b, f):
 
 def get_books(name):
     """('str')->list
-    get all unique works of given name from html page and save all in one file
+    dsc: get all unique works of given name from LT catalog html page and saves
+    all in one file and returns unique book work ids for given user name
     """
     user_agent = """Mozilla/5.0 (X11; U; Linux i686;
  en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1"""
@@ -409,7 +444,8 @@ view=%s&offset=%s""" % (name, offset)
 
 def find_books(name):
     """('str')->list
-    find all unique works of given name (version 2, from html)
+    dsc: finds all unique works of given name from LT catalog html page and
+    saves all in one file and returns unique book work ids for given user name
     """
     try:  # make sure the file exist
         with open('./data/profile/html/'+name+'.html', 'r') as file:
@@ -423,7 +459,8 @@ def find_books(name):
 
 def get_reviews(work):
     """(str)->list
-    dsc: get all reviews of given book work id
+    dsc: get all reviews of given book work id. result includes user name of 
+    reviewer, ranke he gave to work and the main text of the review
     """
     url = """http://www.librarything.com/ajax_profilereviews.php?offset=0
 &type=3&showCount=10000&workid=%s&languagePick=en&mode=profile""" % work
@@ -528,12 +565,12 @@ def find_all_members(work, rank='all'):
                 links.extend(ranks[-int(i)].findNextSiblings('a'))
         for a in links:
             result.append(a['href'][9:])  # trim tags to get profile name
-    return sorted(result)
+    return result
 
 
 def get_all_tag_work(work):
     """(str)->dic
-    dsc: get all tags and counts for given book
+    dsc: get all tags and counts for given book in a dictionary
     """
     url = """http://www.librarything.com/ajaxinc_showbooktags.php?work=%s
 &all=1&print=1&doit=1&lang=en""" % work
