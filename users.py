@@ -165,6 +165,28 @@ def find_reviews(name):
     return result
 
 
+def find_authors(name):
+    """(str)->list
+    dsc: frim given user name returns all authors of the books that user read
+    """
+    data = find_json_name(name)
+    result = []
+    if data:
+        data = json.loads(data)
+        if 'books' in data.keys() and data['books']:
+            for book_id in data['books'].keys():
+                if data['books'][book_id]['author_code']:
+                    result.append(data['books'][book_id]['author_code'])
+        else:
+            log('No books found for %s' % name, 'Error')
+        return result
+    else:
+        log('No data is available for %s' % name, 'Error')
+    return result
+
+
+#print len(remove_duplicate(find_authors('Jon.Roemer')))
+#print len(find_authors('Jon.Roemer'))
 #print find_reviews('Jon.Roemer')
 #print find_all_tag_name('lissaleone')
 #print find_all_tag_name('jared_doherty')
