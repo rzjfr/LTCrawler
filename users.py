@@ -10,7 +10,7 @@ from urllib2 import *
 from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from time import sleep
-from HelperMethods import *
+from helpers import *
 from books import find_json_name
 
 

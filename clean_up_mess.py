@@ -1,7 +1,7 @@
 import json
 import ast
 import users as f
-from HelperMethods import *
+from helpers import *
 
 
 def string_to_json():

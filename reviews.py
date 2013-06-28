@@ -4,7 +4,7 @@ import re
 import nltk
 import csv
 from nltk.corpus import wordnet
-from HelperMethods import *
+from helpers import *
 
 
 def load_sentiment():

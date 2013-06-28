@@ -2,7 +2,7 @@ import books
 import users as friends
 import json
 import sys
-from HelperMethods import *
+from helpers import *
 
 
 def find_missing_friends(members, known):

@@ -15,7 +15,7 @@ from datetime import datetime
 from time import sleep
 import re
 import mechanize
-from HelperMethods import *
+from helpers import *
 
 
 def get_isbn_title(title):

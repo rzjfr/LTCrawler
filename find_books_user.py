@@ -1,7 +1,7 @@
 import books
 import json
 import sys
-from HelperMethods import *
+from helpers import *
 
 try:
     work = sys.argv[1]

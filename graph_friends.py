@@ -1,12 +1,11 @@
 import books
 import users as friends
 import json
-from HelperMethods import *
+from helpers import *
 from networkx import *
 import matplotlib.pyplot as plt
 from networkx import graphviz_layout
 from datetime import datetime
-import matplotlib.pyplot as pyplt
 import numpy as np
 
 
@@ -226,8 +225,8 @@ def plot_hist(G):
     pos = np.arange(len(a))
     #width = 1.0
     time_stamp = str(datetime.now())
-    pyplt.figure(figsize=(300, 10))
-    ax = pyplt.axes()
+    plt.figure(figsize=(300, 10))
+    ax = plt.axes()
     ax.set_xticks(pos)
     ax.set_xticklabels(a, rotation=30, size='small')
     plt.bar(pos, b, color='r')
