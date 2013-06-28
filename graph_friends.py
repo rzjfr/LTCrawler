@@ -1,5 +1,5 @@
 import books
-import friends
+import users as friends
 import json
 from HelperMethods import *
 from networkx import *
@@ -373,4 +373,4 @@ if __name__ == '__main__':
     members_b = books.find_all_members(work_b)
     #G = analysis_1(work_a, work_b)
     #G = analysis_2(work_a, work_b)
-    G = analysis_3(work_a, work_b)
+    #G = analysis_3(work_a, work_b)

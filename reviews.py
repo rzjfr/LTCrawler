@@ -1,5 +1,5 @@
 import books
-import friends
+import users as friends
 import re
 import nltk
 import csv

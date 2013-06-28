@@ -1,6 +1,6 @@
 import json
 import ast
-import friends as f
+import users as f
 from HelperMethods import *
 
 

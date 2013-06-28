@@ -1,5 +1,5 @@
 import books
-import friends
+import users as friends
 import json
 import sys
 from HelperMethods import *
