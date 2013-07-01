@@ -3,7 +3,7 @@
 """
 All methods related to books in LT
 """
-__all__ = ["find_all_members", "find_all_tag_work", "find_bookids_name",
+__all__ = ["find_all_members", "find_tags", "find_bookids_name",
            "find_isbn_name", "find_reviews", "find_shared_books",
            "find_shared_books_2", "find_work_isbn", "find_work_name"]
 
@@ -541,10 +541,10 @@ def get_all_tag_work(work):
     return result
 
 
-def find_all_tag_work(work):
+def find_tags(work):
     """(str)->dict
     dsc: find all tags from local storage otherwise download and save it
-    >>>find_all_tag_work('dummy')
+    >>>find_tags('dummy')
     {'11111': '24', '22222': '1'}
     """
     # if we had the information local
@@ -568,8 +568,8 @@ def find_all_tag_work(work):
 #print len(find_shared_books_2('scducharme', 'CatsLiteracy', find_work_isbn))
 #print len(find_shared_books_2('scducharme', 'CatsLiteracy', find_books))
 #print len(find_all_members('306947'))
-#print find_all_tag_work('306947')
-#print find_all_tag_work('dummy')
+#print find_tags('306947')
+#print find_tags('dummy')
 #print len(remove_duplicate(find_work_name('scducharme')))
 #print len(remove_duplicate(find_work_name('CatsLiteracy')))
 #print find_work_bookid('85886431')

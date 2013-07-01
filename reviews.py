@@ -103,7 +103,7 @@ all_reviews = books.find_reviews(work)
 text = reviews_text(all_reviews, 'work')
 freq = word_frequency(text)
 word = sort_dict(freq)
-tags = books.find_all_tag_work(work)
+tags = books.find_tags(work)
 #same = []
 #find = {}
 #for k, v in freq.items():
