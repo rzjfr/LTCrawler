@@ -99,10 +99,10 @@ reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
             log("Error "+str(err.code), 'Error')
     except URLError, err:
         log(str(err.reason), 'Error')
-    except ContentTooShortError:
-        log('Content too short for %s' % name, 'Error')
-        print('Retring...')
-        return get_json_name(name)
+    #except ContentTooShortError:
+        #log('Content too short for %s' % name, 'Error')
+        #print('Retring...')
+        #return get_json_name(name)
     data = respond.read()
     return data
 
@@ -373,6 +373,67 @@ def find_work_isbn(name):
     return works
 
 
+def find_work_name_2(name):
+    """(str)->list
+    dsc: returns a list of workid for given user name
+    """
+    # if we had the information local
+    with open('./data/books.json', 'r') as name_repository:
+        for line in name_repository:
+            record = json.loads(line)
+            if name in record.keys():
+                return record[name]
+    # calculate it
+    data = find_json_name(name)
+    data = json.loads(data)
+    isbns = []
+    works = []
+    if 'books' in data.keys() and data['books']:
+        for book_id in data['books'].keys():
+            isbn = data['books'][book_id]['ISBN_cleaned']
+            if isbn == '':  # find missing isbn
+                print '...'
+                work = find_work_bookid(book_id)
+                works.append(work)
+            else:  # find work id
+                isbns.append(isbn)
+    else:
+        message = 'No book found for %s' % name
+        log(message)
+    works.extend(find_isbn_work(isbns))
+    return works
+
+
+def find_isbn_work(isbns):
+    """(list)->list
+    dsc: from a list of isbns returns a list of works
+    """
+    base = "http://www.librarything.com/api/json/workinfo.js?ids="
+    url = base + ','.join(isbns)
+    try:
+        html = urlopen(url)
+        html = html.read()
+        works = re.findall('(work\":\")(\d+)', html)
+        works = [j for i, j in works]
+        if len(works) != len(set(isbns)):
+            log('Some isbns missing', 'Error')
+        #else:  # no reason for this part
+            #temp = zip(isbns,works)
+            #for isbn, work in temp:
+                #with open('./data/isbn_to_work.csv', 'a') as isbn_repository:
+                    #isbn_repository.write(",".join([isbn, work+"\n"]))
+        return works
+    except HTTPError, err:
+        if err.code == 404:
+            log("Page not found!", 'Error')
+        elif err.code == 403:
+            log("Access denied!", 'Error')
+        else:
+            log("Error "+str(err.code), 'Error')
+    except URLError, err:
+        log(str(err.reason), 'Error')
+
+
 def find_shared_books_2(user_a, user_b, f):
     """(str, str, funcrion)->str
     dsc: find shared books of two users with arbitrary find book works function
@@ -423,7 +484,7 @@ def get_books(name):
             url = """http://www.librarything.com/catalog_bottom.php?
 view=%s&offset=%s""" % (name, offset)
             url = url.replace("\n", "")
-            sleep(0.5)
+            #sleep(0.5)
             try:
                 browser = agent.open(url)
             except HTTPError, err:
@@ -632,4 +693,6 @@ def find_all_tag_work(work):
 #print find_work_bookid('85886431')
 #print find_work_bookid('71999056')
 #print len(find_books('Jon.Roemer'))
+#print len(find_work_name_2('cc_rec'))
+#print len(set(find_books('cc_rec')))
 #print len(remove_duplicate(find_work_name('Jon.Roemer')))
