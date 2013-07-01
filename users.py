@@ -52,11 +52,11 @@ def find_json_name(name):
     string
     """
     try:  # if the file already exists
-        with open('./data/profile/'+name+'.json') as f:
+        with open('./data/profile/json/'+name+'.json') as f:
             data = f.read()
     except IOError:  # otherwise get it and save it
         data = get_json_name(name)
-        with open("./data/profile/"+name+".json", "w") as f:
+        with open("./data/profile/json/"+name+".json", "w") as f:
             f.write(data)
     return data
 
@@ -314,7 +314,7 @@ view=%s&offset=%s""" % (name, offset)
             repeat = False
     print '%d pages crawled for %s' % (len(htmls), name)
     # save all pages in one file
-    with open('./data/profile/html/%s.html' % name, 'w') as name_repository:
+    with open('./data/profile/catalog/%s.html' % name, 'w') as name_repository:
         content = '\n'.join(htmls)
         name_repository.write(content)
     return remove_duplicate(books)
@@ -330,7 +330,7 @@ def find_books(name):
     47
     """
     try:  # make sure the file exist
-        with open('./data/profile/html/'+name+'.html', 'r') as file:
+        with open('./data/profile/catalog/'+name+'.html', 'r') as file:
             data = file.read()
         books = re.findall('/work/(\d+)/', data)
         books = remove_duplicate(books)
