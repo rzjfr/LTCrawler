@@ -440,12 +440,12 @@ def find_reviews(work):
     dsc: get all reviews of given book work id if not exist in local storage
     """
     # if we have the information local
-    with open('./data/book_review.json', 'r') as book_repository:
+    with open('./data/books_review.json', 'r') as book_repository:
         for line in book_repository:
             record = json.loads(line)
             if work in record.keys():
                 return record[work]
-    with open('./data/book_review.json', 'a') as book_repository:
+    with open('./data/books_review.json', 'a') as book_repository:
         review = get_reviews(work)
         if review != []:
             record = json.dumps({work: review})
@@ -548,7 +548,7 @@ def find_tags(work):
     {'11111': '24', '22222': '1'}
     """
     # if we had the information local
-    with open('./data/tags.json', 'r') as tag_repository:
+    with open('./data/books_tags.json', 'r') as tag_repository:
         for line in tag_repository:
             record = json.loads(line)
             if work in record.keys():
@@ -556,7 +556,7 @@ def find_tags(work):
     #if we don't have tags for given work id
     tags = get_all_tag_work(work)
     if tags != {}:
-        with open('./data/tags.json', 'a') as tag_repository:
+        with open('./data/books_tags.json', 'a') as tag_repository:
             record = json.dumps({work: tags})
             tag_repository.write(record+'\n')
         return record

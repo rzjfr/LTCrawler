@@ -22,7 +22,7 @@ def log(message, types='Warning'):
     print "%s: %s, more information in LT.log" % (types, message)
 
 
-def load_local_friends(path='./data/friends.json'):
+def load_local_friends(path='./data/users_friends.json'):
     """()->dict
     dsc: loads all friends list from file
     """
@@ -34,7 +34,7 @@ def load_local_friends(path='./data/friends.json'):
     return result
 
 
-def all_local_members(path='./data/friends.json'):
+def all_local_members(path='./data/users_friends.json'):
     """()->list
     dsc: returns all user names in friends file
     """

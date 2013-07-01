@@ -156,13 +156,13 @@ def find_friends(name):
     >>>find_friends('masoodr')
     No connection
     """
-    with open('./data/friends.json', 'r') as name_repository:
+    with open('./data/users_friends.json', 'r') as name_repository:
         for line in name_repository:
             record = json.loads(line)
             if name in record.keys():
                 return record[name]
     friends = get_all_friends(name)
-    with open('./data/friends.json', 'a') as name_repository:
+    with open('./data/users_friends.json', 'a') as name_repository:
         record = json.dumps({name: friends})
         name_repository.write(record+'\n')
     return friends
@@ -205,7 +205,7 @@ def find_tags(name):
     {'11111': '24', '22222': '1'}
     """
     # if we had the information local
-    with open('./data/tags_user.json', 'r') as tag_repository:
+    with open('./data/users_tags.json', 'r') as tag_repository:
         for line in tag_repository:
             record = json.loads(line)
             if name in record.keys():
@@ -214,7 +214,7 @@ def find_tags(name):
     print 'Downloading tag list for %s' % name
     tags = get_all_tag_name(name)
     #if tags != {}:
-    with open('./data/tags_user.json', 'a') as tag_repository:
+    with open('./data/users_tags.json', 'a') as tag_repository:
         record = json.dumps({name: tags})
         tag_repository.write(record+'\n')
     return tags
