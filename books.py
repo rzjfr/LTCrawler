@@ -4,9 +4,8 @@
 All methods related to books in LT
 """
 __all__ = ["find_all_members", "find_all_tag_work", "find_bookids_name",
-           "find_isbn_name", "find_json_name", "find_reviews",
-           "find_shared_books", "find_shared_books_2", "find_work_isbn",
-           "find_work_name"]
+           "find_isbn_name", "find_reviews", "find_shared_books",
+           "find_shared_books_2", "find_work_isbn", "find_work_name"]
 
 import json
 from urllib2 import *
@@ -15,6 +14,7 @@ from datetime import datetime
 from time import sleep
 import re
 from helpers import *
+from users import find_json_name
 
 
 def get_isbn_title(title):
@@ -73,52 +73,6 @@ def get_work_title_retry(title):
     else:
         log('Even after retry no isbn found for '+str(title))
         return 'NA'
-
-
-def get_json_name(name):
-    """(str)->str
-    dsc: returns json formated string for given user name.
-    API Documentations:
-    www.librarything.com/wiki/index.php/LibraryThing_JSON_Books_API
-    """
-    print 'Retrieving data for %s...' % name
-    url = '''http://www.librarything.com/api_getdata.php?
-userid=%s&tagList=0&showstructure=1&max=1000000&
-reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
-&showTags=1&responseType=json''' % name
-    url = url.replace("\n", "")
-    try:
-        respond = urlopen(url)
-    except HTTPError, err:
-        if err.code == 404:
-            log("Page not found!", 'Error')
-        elif err.code == 403:
-            log("Access denied!", 'Error')
-        else:
-            log("Error "+str(err.code), 'Error')
-    except URLError, err:
-        log(str(err.reason), 'Error')
-    #except ContentTooShortError:
-        #log('Content too short for %s' % name, 'Error')
-        #print('Retring...')
-        #return get_json_name(name)
-    data = respond.read()
-    return data
-
-
-def find_json_name(name):
-    """(str)->str
-    dsc: finds json file for a given user name and returns it as json formated
-    string
-    """
-    try:  # if the file already exists
-        with open('./data/profile/'+name+'.json') as f:
-            data = f.read()
-    except IOError:  # otherwise get it and save it
-        data = get_json_name(name)
-        with open("./data/profile/"+name+".json", "w") as f:
-            f.write(data)
-    return data
 
 
 def find_isbn_name(name):

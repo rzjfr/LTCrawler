@@ -3,7 +3,8 @@
 """
 All methods related to user in LT
 """
-__all__ = ["find_tags", "find_authors", "find_friends", "find_reviews"]
+__all__ = ["find_tags", "find_authors", "find_friends", "find_reviews",
+           "find_books", "find_json_name"]
 
 import json
 from urllib2 import *
@@ -12,7 +13,52 @@ from datetime import datetime
 import mechanize
 from time import sleep
 from helpers import *
-from books import find_json_name
+
+
+def get_json_name(name):
+    """(str)->str
+    dsc: returns json formated string for given user name.
+    API Documentations:
+    www.librarything.com/wiki/index.php/LibraryThing_JSON_Books_API
+    """
+    print 'Retrieving data for %s...' % name
+    url = '''http://www.librarything.com/api_getdata.php?
+userid=%s&tagList=0&showstructure=1&max=1000000&
+reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
+&showTags=1&responseType=json''' % name
+    url = url.replace("\n", "")
+    try:
+        respond = urlopen(url)
+    except HTTPError, err:
+        if err.code == 404:
+            log("Page not found!", 'Error')
+        elif err.code == 403:
+            log("Access denied!", 'Error')
+        else:
+            log("Error "+str(err.code), 'Error')
+    except URLError, err:
+        log(str(err.reason), 'Error')
+    #except ContentTooShortError:
+        #log('Content too short for %s' % name, 'Error')
+        #print('Retring...')
+        #return get_json_name(name)
+    data = respond.read()
+    return data
+
+
+def find_json_name(name):
+    """(str)->str
+    dsc: finds json file for a given user name and returns it as json formated
+    string
+    """
+    try:  # if the file already exists
+        with open('./data/profile/'+name+'.json') as f:
+            data = f.read()
+    except IOError:  # otherwise get it and save it
+        data = get_json_name(name)
+        with open("./data/profile/"+name+".json", "w") as f:
+            f.write(data)
+    return data
 
 
 def get_user_page(name):
