@@ -5,7 +5,8 @@ Some general helper methods
 """
 __all__ = ["all_local_members", "count_items", "find_key_by_value", "log",
            "find_null_friends", "has_duplicate", "load_local_friends",
-           "remove_duplicate", "sort_dict", "write_to_file"]
+           "remove_duplicate", "sort_dict", "write_to_file",
+           "find_users_shared_books"]
 
 import json
 from datetime import datetime
@@ -139,3 +140,16 @@ def sort_dict(dic):
     dsc: returns a list of given dictionary keys sorted by its value
     """
     return list(sorted(dic, key=dic.__getitem__, reverse=True))
+
+
+def find_users_shared_books(user_a, user_b, f):
+    """(str, str, funcrion)->str
+    dsc: find shared books of two users with arbitrary find book works function
+    """
+    works_a = f(user_a)
+    works_b = f(user_b)
+    result = []
+    for work in works_a:
+        if work in works_b:
+            result.append(work)
+    return result
