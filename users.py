@@ -14,6 +14,38 @@ from helpers import *
 from books import find_json_name
 
 
+def get_user_page(name):
+    """(str)->str
+    dsc: get profile page for given username and save it in html
+    """
+    try:  # read content if file already exits
+        with open('./data/profile/page/'+name+'.html') as f:
+            html = f.read()
+    except IOError:  # otherwise get it and save it  for further use
+        print 'Retrieving profile page for %s...' % name
+        url = 'http://www.librarything.com/profile/' + quote(name)
+        try:
+            html = urlopen(url)
+            html = html.read()
+        except HTTPError, err:
+            if err.code == 404:
+                log("Page not found!")
+                html = 'No access'
+            elif err.code == 403:
+                log("Access denied!")
+                html = 'No access'
+            else:
+                log("Error "+str(err.code))
+                html = 'No access'
+        except URLError, err:
+            log(str(err.reason))
+            html = 'No access'
+        # save in file
+        with open('./data/profile/page/%s.html' % name, 'w') as f:
+            f.write(html)
+    return html
+
+
 def get_all_friends(name):
     """(str)->list
     dsc: find all friends of a given person
