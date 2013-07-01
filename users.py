@@ -3,7 +3,7 @@
 """
 All methods related to user in LT
 """
-__all__ = ["find_all_tag_name", "find_authors", "find_friends", "find_reviews"]
+__all__ = ["find_tags", "find_authors", "find_friends", "find_reviews"]
 
 import json
 from urllib2 import *
@@ -151,7 +151,7 @@ def get_all_tag_name(name):
     return result
 
 
-def find_all_tag_name(name):
+def find_tags(name):
     """(str)->dict
     dsc: find all tags from local storage otherwise download and save it
     >>>find_all_tag_work('dummy')
@@ -220,9 +220,9 @@ def find_authors(name):
 #print len(remove_duplicate(find_authors('Jon.Roemer')))
 #print len(find_authors('Jon.Roemer'))
 #print find_reviews('Jon.Roemer')
-#print find_all_tag_name('lissaleone')
-#print find_all_tag_name('jared_doherty')
-#print find_all_tag_name('MaryRose')
+#print find_tags('lissaleone')
+#print find_tags('jared_doherty')
+#print find_tags('MaryRose')
 #print get_all_friends('Zaki_Jalil')
 #print get_all_friends('Mysterion')
 #print get_all_friends('razorsoccamsells')
