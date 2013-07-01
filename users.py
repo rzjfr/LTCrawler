@@ -17,6 +17,10 @@ from books import find_json_name
 def get_user_page(name):
     """(str)->str
     dsc: get profile page for given username and save it in html
+    >>>len(get_user_page('masoodr'))
+    15879
+    >>>len(get_user_page('gothic_cowgirl'))
+    9
     """
     try:  # read content if file already exits
         with open('./data/profile/page/'+name+'.html') as f:
@@ -29,13 +33,13 @@ def get_user_page(name):
             html = html.read()
         except HTTPError, err:
             if err.code == 404:
-                log("Page not found!")
+                log("Page not found!", 'Error')
                 html = 'No access'
             elif err.code == 403:
-                log("Access denied!")
+                log("Access denied!", 'Error')
                 html = 'No access'
             else:
-                log("Error "+str(err.code))
+                log("Error "+str(err.code), 'Error')
                 html = 'No access'
         except URLError, err:
             log(str(err.reason))
@@ -52,51 +56,38 @@ def get_all_friends(name):
     >>>get_all_friends('Jon.Roemer')
     ['Movielizard', 'Vintagecoats']
     >>>get_all_friends('masoodr')
-    []
+    No connection
+    >>>get_all_friends('gothic_cowgirl')
+    No access
     """
-    print 'Retrieving friends list for %s...' % name
-    url = 'http://www.librarything.com/profile/' + quote(name)
     result = []
-    friends = None  # to solve pass 403 error
-    try:
-        html = urlopen(url)
-        html = BeautifulSoup(html.read())
-        friends = html.find('div',
-                            attrs={'class': 'profileactionsection first'})
-    except HTTPError, err:
-        if err.code == 404:
-            log("Page not found!")
-            return 'No access'
-        elif err.code == 403:
-            log("Access denied!")
-            return 'No access'
-        else:
-            log("Error "+str(err.code))
-            return 'No access'
-    except URLError, err:
-        log(str(err.reason))
-        return 'No access'
+    html = get_user_page(name)
+    if html == 'No access':
+        return html
+    html = BeautifulSoup(html)
+    friends = html.find('div',
+                        attrs={'class': 'profileactionsection first'})
     if not friends:
         alert = html.find('p', attrs={'class': 'alert'})
         profile = html.find('div', attrs={'class': 'profile'})
         if alert:
-            log('No data for %s: %s' % (name, alert.text[:-1]))
+            log('No data for %s: %s' % (name, alert.text[:-1]), 'Warning')
             return 'Removed'
         elif profile:
-            log('No data for %s: user data is private' % name)
+            log('No data for %s: user data is private' % name, 'Warning')
             return 'Private'
         else:
             alert = html.find('p')
             if alert:
                 msg = alert.text[22:-1]
                 if msg == 'User has been deleted or never existed':
-                    log('No data for %s: %s' % (name, msg))
+                    log('No data for %s: %s' % (name, msg), 'Warning')
                     return 'Not exist'
                 else:
-                    log('No data for %s: Unknown Problem' % name)
+                    log('No data for %s: Unknown Problem' % name, 'Error')
                     return 'NA'
     elif friends("p")[0].text == "No connections":
-        log('No data for %s: No connection' % name)
+        # no friends list no intrested library means no connection
         return 'No connection'
     else:
         if friends.find('p'):
@@ -105,18 +96,18 @@ def get_all_friends(name):
             for friend in friends('a'):
                 result.append(friend.text)
         else:
-            log('No data for %s: No list is available' % name)
+            # no friend list
             return 'No list'
     return result
 
 
 def find_friends(name):
     """(str)->list
-    dsc: find friends from local storage or get it from internet
+    dsc: returns friends list for given name
     >>>find_friends('dummy')
     ['11111', '22222']
     >>>find_friends('masoodr')
-    []
+    No connection
     """
     with open('./data/friends.json', 'r') as name_repository:
         for line in name_repository:
