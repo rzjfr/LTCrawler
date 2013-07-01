@@ -3,8 +3,7 @@
 """
 All methods related to books in LT
 """
-__all__ = ["find_all_members", "find_tags", "find_reviews",
-           "find_shared_books_2"]
+__all__ = ["find_all_members", "find_tags", "find_reviews"]
 
 import json
 from urllib2 import *

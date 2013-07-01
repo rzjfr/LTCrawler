@@ -38,7 +38,7 @@ reviewmax=10000000&showCollections=1&showReviews=1&showCollections=1
             log("Error "+str(err.code), 'Error')
     except URLError, err:
         log(str(err.reason), 'Error')
-    #except ContentTooShortError:
+    #except ContentTooShortError, err:
         #log('Content too short for %s' % name, 'Error')
         #print('Retring...')
         #return get_json_name(name)
@@ -155,6 +155,10 @@ def find_friends(name):
     ['11111', '22222']
     >>>find_friends('masoodr')
     No connection
+    >>>find_friends('Movielizard')
+    ['atimmons', 'Jon.Roemer', 'onemoreday', 'Vintagecoats']
+    >>>find_friends('gothic_cowgirl')
+    No access
     """
     with open('./data/users_friends.json', 'r') as name_repository:
         for line in name_repository:
@@ -223,6 +227,12 @@ def find_tags(name):
 def find_reviews(name):
     """(str)->list
     dsc: get all reviews of given book work id if not exist in local storage
+    >>>len(find_reviews('Jon.Roemer'))
+    15
+    >>>find_tags('lissaleone')
+    {'library book': '9', 'own': '2'}
+    >>>find_tags('jared_doherty')
+    {}
     """
     # if we have the information local
     data = find_json_name(name)
@@ -231,7 +241,6 @@ def find_reviews(name):
         data = json.loads(data)
         if 'books' in data.keys() and data['books']:
             for book_id in data['books'].keys():
-                    #result.append(book_id)
                 if data['books'][book_id]['hasreview'] == '1':
                     result.append(data['books'][book_id]['bookreview'])
         else:
@@ -247,6 +256,8 @@ def find_authors(name):
     dsc: from given user name returns all authors using json data file
     >>>find_authors('rzjfr')
     ['adamsdouglas']
+    >>>len(remove_duplicate(find_authors('Jon.Roemer')))
+    95
     """
     data = find_json_name(name)
     result = []
@@ -337,21 +348,3 @@ def find_books(name):
     except IOError:  # otherwise get it and save it  for further use
         books = get_books(name)
     return books
-
-
-#print len(remove_duplicate(find_authors('Jon.Roemer')))
-#print len(find_authors('Jon.Roemer'))
-#print find_reviews('Jon.Roemer')
-#print find_tags('lissaleone')
-#print find_tags('jared_doherty')
-#print find_tags('MaryRose')
-#print get_all_friends('Zaki_Jalil')
-#print get_all_friends('Mysterion')
-#print get_all_friends('razorsoccamsells')
-#print get_all_friends('vchia')
-#print get_all_friends('newsativa')
-#print find_friends('Movielizard')
-#print find_friends('gothic_cowgirl')
-#print get_all_friends('CLHarris')
-#print get_all_friends('aakin')
-#print get_all_friends('DiannaN')
