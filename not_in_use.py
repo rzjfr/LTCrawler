@@ -394,3 +394,12 @@ def find_isbn_work(isbns):
 #print len(find_users_shared_books('Des2', 'Jon.Roemer', find_books))
 #print len(find_users_shared_books('scducharme', 'CatsLiteracy', find_work_isbn))
 #print len(find_users_shared_books('scducharme', 'CatsLiteracy', find_books))
+#work = '306947'
+#members = books.find_all_members(work)  # all members of given work
+#members = remove_duplicate(members)
+#print len(members)
+#i = 0
+#for member in members:
+    #i += 1
+    #print '%d of %d, %s' % (i, len(members), member)
+    #books.find_work_name(member)

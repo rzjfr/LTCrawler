@@ -1,3 +1,7 @@
+"""
+finds all friends list for all  given work id members and saves the results
+in a json file: "./data/users_friends.json"
+"""
 import books
 import users as friends
 import json

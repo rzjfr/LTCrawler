@@ -348,3 +348,5 @@ def find_books(name):
     except IOError:  # otherwise get it and save it  for further use
         books = get_books(name)
     return books
+
+get_user_page('the_red_shoes')

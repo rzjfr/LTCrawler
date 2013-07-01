@@ -1,3 +1,7 @@
+"""
+finds book catalogs for all members of a given work id and saves them in html
+files: "./data/profile/catalog/*.html"
+"""
 import users
 import books
 import json
@@ -6,7 +10,6 @@ from helpers import *
 
 try:
     work = sys.argv[1]
-    #members = load_local_friends()
 except:
     work = '306947'
 members = books.find_all_members(work)  # all members of given work
