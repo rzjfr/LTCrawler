@@ -1,3 +1,4 @@
+import users
 import books
 import json
 import sys
@@ -15,4 +16,4 @@ i = 0
 for member in members:
     i += 1
     print '%d of %d, %s' % (i, len(members), member)
-    books.find_books(member)
+    users.find_books(member)

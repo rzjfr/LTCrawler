@@ -4,7 +4,7 @@
 All methods related to books in LT
 """
 __all__ = ["find_all_members", "find_all_tag_work", "find_bookids_name",
-           "find_books", "find_isbn_name", "find_json_name", "find_reviews",
+           "find_isbn_name", "find_json_name", "find_reviews",
            "find_shared_books", "find_shared_books_2", "find_work_isbn",
            "find_work_name"]
 
@@ -14,7 +14,6 @@ from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from time import sleep
 import re
-import mechanize
 from helpers import *
 
 
@@ -447,77 +446,6 @@ def find_shared_books_2(user_a, user_b, f):
     return result
 
 
-def get_books(name):
-    """('str')->list
-    dsc: get all unique works of given name from LT catalog html page and saves
-    all in one file and returns unique book work ids for given user name
-    """
-    user_agent = """Mozilla/5.0 (X11; U; Linux i686;
- en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1"""
-    user_agent = user_agent.replace("\n", "")
-    agent = mechanize.Browser()
-    agent.addheaders = [('User-agent', user_agent)]
-    url = 'http://www.librarything.com/catalog_bottom.php?view=%s' % name
-    try:
-        browser = agent.open(url)
-    except HTTPError, err:
-        log("Error "+str(err.code))
-        return 'NA'
-    except URLError, err:
-        log(str(err.reason))
-        return 'NA'
-    repeat = True
-    htmls = []
-    books = []
-    while repeat:
-        htmls.append(browser.read())
-        has_next_page = re.search('\>next page\<\/a\>', htmls[-1])
-        books.extend(re.findall('/work/(\d+)/', htmls[-1]))
-        i = re.search('(<td class="pbGroup">\d{1,7} &ndash; )(.{6,20})(</td>)',
-                      htmls[-1])
-        if i is None:
-            log('book list for %s is NA' % name)
-            break
-        print 'downloading %s for %s...' % (i.group(2), name)
-        if has_next_page:
-            offset = str(50*len(htmls))
-            url = """http://www.librarything.com/catalog_bottom.php?
-view=%s&offset=%s""" % (name, offset)
-            url = url.replace("\n", "")
-            #sleep(0.5)
-            try:
-                browser = agent.open(url)
-            except HTTPError, err:
-                log("Error "+str(err.code))
-                return 'NA'
-            except URLError, err:
-                log(str(err.reason))
-                return 'NA'
-        else:
-            repeat = False
-    print '%d pages crawled for %s' % (len(htmls), name)
-    # save all pages in one file
-    with open('./data/profile/html/%s.html' % name, 'w') as name_repository:
-        content = '\n'.join(htmls)
-        name_repository.write(content)
-    return remove_duplicate(books)
-
-
-def find_books(name):
-    """('str')->list
-    dsc: finds all unique works of given name from LT catalog html page and
-    saves all in one file and returns unique book work ids for given user name
-    """
-    try:  # make sure the file exist
-        with open('./data/profile/html/'+name+'.html', 'r') as file:
-            data = file.read()
-        books = re.findall('/work/(\d+)/', data)
-        books = remove_duplicate(books)
-    except IOError:  # otherwise get it and save it  for further use
-        books = get_books(name)
-    return books
-
-
 def get_reviews(work):
     """(str)->list
     dsc: get all reviews of given book work id. result includes user name of 
@@ -692,7 +620,5 @@ def find_all_tag_work(work):
 #print len(remove_duplicate(find_work_name('CatsLiteracy')))
 #print find_work_bookid('85886431')
 #print find_work_bookid('71999056')
-#print len(find_books('Jon.Roemer'))
 #print len(find_work_name_2('cc_rec'))
-#print len(set(find_books('cc_rec')))
 #print len(remove_duplicate(find_work_name('Jon.Roemer')))
